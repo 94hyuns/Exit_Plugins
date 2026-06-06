@@ -1,0 +1,24 @@
+name: Cosmetics
+version: 1.3.1
+main: com.exit.cosmetics.CosmeticsPlugin
+api-version: 1.21
+description: 치장 시스템 - 뽑기 기반 모자/날개/트레일 + 탈것 획득 및 장착/소환
+depend: [Core]
+softdepend: [ModelEngine, MythicMobs]
+commands:
+  치장:
+    description: 치장 관리자 명령어
+    usage: /<command> <setnpc|removenpc|give|giveticket|givemountticket|reload>
+    permission: cosmetics.admin
+  ride:
+    description: 탈것 GUI 오픈 (보유 탈것 소환/해제)
+    usage: /<command>
+    aliases: [탈것, xkfrjt]
+  가루:
+    description: (관리자) 치장 가루 직접 지급
+    usage: /<command> <player> <amount>
+    permission: cosmetics.admin
+permissions:
+  cosmetics.admin:
+    description: 치장 시스템 관리자 권한
+    default: op

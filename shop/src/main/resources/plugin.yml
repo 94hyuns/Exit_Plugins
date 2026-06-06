@@ -1,0 +1,25 @@
+name: Shop
+version: 1.8.0
+main: com.exit.shop.ShopPlugin
+api-version: "1.21"
+depend: [Core]
+softdepend: [CustomItems, Farming, Fishing, Job]
+description: NPC 상점 - 광물/작물/램프 거래 + 낚시 상인 + 경작지 티켓
+
+commands:
+  shop:
+    description: 상점 관리 명령어
+    usage: /shop <spawn|remove|setskin|prices|reload>
+    permission: shop.admin
+  시세변동:
+    description: 시세 갱신까지 남은 시간 / 관리자 진행·예약
+    usage: /시세변동 [skip <n> | schedule <분> [초]]
+    permission: shop.use
+
+permissions:
+  shop.admin:
+    description: 상점 관리자 권한
+    default: op
+  shop.use:
+    description: 상점 사용 권한
+    default: true

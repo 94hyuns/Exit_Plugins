@@ -1,0 +1,32 @@
+name: Land
+version: 1.1.2
+main: com.example.land.LandPlugin
+api-version: 1.21
+authors: [custom]
+description: 청크 클레임 및 보호 플러그인
+
+depend: [Core, Economy]
+softdepend: [World]
+
+commands:
+  land:
+    description: Land 플러그인 명령어
+    usage: /land <claim|unclaim|list|info>
+    aliases: [땅]
+
+permissions:
+  land.claim:
+    description: 청크 구매 권한
+    default: true
+  land.unclaim:
+    description: 청크 반환 권한
+    default: true
+  land.list:
+    description: 청크 목록 확인
+    default: true
+  land.info:
+    description: 청크 정보 모드
+    default: true
+  land.admin:
+    description: 관리자 권한 (강제 해제 등)
+    default: op

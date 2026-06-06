@@ -1,0 +1,18 @@
+name: DungeonRewards
+version: 1.0.0
+main: com.exit.rewards.DungeonRewardsPlugin
+api-version: "1.21"
+depend: [Core, Economy, MythicMobs]
+description: 던전 몹 처치 시 돈/아이템 보상 지급
+
+commands:
+  dungeonrewards:
+    description: 던전 보상 플러그인 관리
+    aliases: [drewards, dr]
+    usage: /dungeonrewards <reload|list>
+    permission: dungeonrewards.admin
+
+permissions:
+  dungeonrewards.admin:
+    description: 던전 보상 플러그인 관리자 권한
+    default: op

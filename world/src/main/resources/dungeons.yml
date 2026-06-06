@@ -1,0 +1,100 @@
+# 던전 마스터 NPC + 던전/보스 항목 설정
+# - 코드는 건드리지 말고 비용/위치/항목만 여기서 조절
+# - tab: DUNGEON 또는 BOSS
+# - world-name: worlds.yml 의 world-name 과 일치해야 함
+
+npc:
+  world: world_village
+  x: 95.5
+  y: 65
+  z: 50.5
+  yaw: 0
+  pitch: 0
+  skin: Steve              # 스킨을 가져올 플레이어 닉네임. 추후 /던전마스터 setskin 으로 변경 가능
+  name: "§4던전 마스터"     # bold 금지, color code 만
+
+dungeons:
+  # GUI 슬롯 배치 (9칸 × 6행 인벤. 본문 영역 슬롯 9~44):
+  #   Row 1 (slot 12, 14): 초급 던전 → 버닝 초급
+  #   Row 2 (slot 21, 23): 중급 던전 → 버닝 중급
+  dungeon1:
+    tab: DUNGEON
+    world-name: world_dungeon
+    display-name: "§a초급 던전"
+    icon: WITHER_SKELETON_SKULL
+    cost: 1000
+    gui-slot: 12
+
+  dungeon2:
+    tab: DUNGEON
+    world-name: world_dungeon2
+    display-name: "§e중급 던전"
+    icon: SKELETON_SKULL
+    cost: 10000
+    gui-slot: 21
+
+  burning1:
+    tab: DUNGEON
+    world-name: world_burning1
+    display-name: "§c버닝 초급 던전"
+    icon: WITHER_SKELETON_SKULL
+    cost: 10000
+    time-limit-sec: 1800       # 30분 후 자동 마을 귀환
+    gui-slot: 14
+
+  burning2:
+    tab: DUNGEON
+    world-name: world_burning2
+    display-name: "§c버닝 중급 던전"
+    icon: SKELETON_SKULL
+    cost: 100000
+    time-limit-sec: 1800
+    gui-slot: 23
+
+  # 보스 1 — 동일 보스를 두 별개 월드 인스턴스로 운영 (난입 대기 회피 목적)
+  # world_boss1 폴더를 복붙해서 world_boss1_1, world_boss1_2 두 폴더로 운영
+  boss1_1:
+    tab: BOSS
+    world-name: world_boss1_1
+    display-name: "§6보스 1-1"
+    icon: DRAGON_HEAD
+    cost: 30000
+    gui-slot: 12
+    boss-arena:
+      boss-mob: TheLichKing1
+      boss-x: 7
+      boss-y: 6
+      boss-z: 9.5
+      countdown-sec: 30      # 첫 입장 후 보스 등장까지
+      cooldown-sec: 600      # 보스 처치 후 다음 등장까지 (10분)
+      grace-sec: 60          # 처치/와이프 후 입장 잠금 (60초 — 추가 난입 차단)
+      kill-reward-min: 300000
+      kill-reward-max: 300000
+      damage-multiplier: 0.00667   # 실제 HP 1000 / 0.00667 ≈ 실효 150,000 (Bukkit 1024 캡 우회)
+
+  boss1_2:
+    tab: BOSS
+    world-name: world_boss1_2
+    display-name: "§6보스 1-2"
+    icon: DRAGON_HEAD
+    cost: 30000
+    gui-slot: 14
+    boss-arena:
+      boss-mob: TheLichKing1
+      boss-x: 7
+      boss-y: 6
+      boss-z: 9.5
+      countdown-sec: 30
+      cooldown-sec: 600
+      grace-sec: 60
+      kill-reward-min: 300000
+      kill-reward-max: 300000
+      damage-multiplier: 0.00667
+
+  boss2:
+    tab: BOSS
+    world-name: world_boss2
+    display-name: "§c보스 2"
+    icon: NETHER_STAR
+    cost: 3000
+    gui-slot: 22

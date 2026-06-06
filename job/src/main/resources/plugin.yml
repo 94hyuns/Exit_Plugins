@@ -1,0 +1,24 @@
+name: Job
+version: 2.5.1
+main: com.exit.job.JobPlugin
+api-version: "1.21"
+depend: [Core]
+description: 직업 시스템 (광부/어부/농부)
+
+commands:
+  직업정보:
+    description: 직업 현황 GUI 오픈
+    usage: /직업정보 [플레이어]
+  직업관리:
+    description: 직업 EXP/레벨 관리 (OP)
+    usage: /직업관리 <addexp|setlevel> <플레이어> <jobId> <값>
+    permission: job.admin
+  보관함재발급:
+    description: 직업 보관함 재발급 (OP)
+    usage: /보관함재발급 <광부|어부|농부> <플레이어>
+    permission: job.admin
+
+permissions:
+  job.admin:
+    description: 직업 관리자 권한
+    default: op

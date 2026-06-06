@@ -1,0 +1,51 @@
+# ─── Maven 빌드 산출물 ────────────────────────────────────
+target/
+*.class
+
+# paper-nms 매핑 캐시 (사용자가 직접 init 으로 생성)
+.paper-nms/
+
+# ─── IDE ─────────────────────────────────────────────────
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+.project
+.classpath
+.settings/
+*.DS_Store
+Thumbs.db
+desktop.ini
+
+# ─── 운영 deploy 스크립트 (private, 운영 서버 정보 포함) ──
+deploy_*.ps1
+deploy_*.bat
+fix_*.ps1
+fix_*.bat
+sync_*.ps1
+sync_*.bat
+op_*.bat
+deop_*.bat
+server_log_*.bat
+*.bat
+
+# ─── 외부 사용권 자산 ────────────────────────────────────
+# bbmodel (BlockBench 외부 작가 모델)
+modelengine_blueprints/
+# 외부 아머/익날개 zip 팩들 (Mush-Warrior, Knight's Armor 등)
+치장 샘플/
+
+# ─── Claude 세션/설정 ────────────────────────────────────
+.claude/
+
+# ─── 로그 / 백업 ─────────────────────────────────────────
+*.log
+*.log.gz
+backup/
+backups/
+
+# ─── 환경 ────────────────────────────────────────────────
+.env
+.env.*
+*.local

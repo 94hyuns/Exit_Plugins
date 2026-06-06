@@ -1,0 +1,19 @@
+name: World
+version: 1.4.0
+main: com.exit.world.WorldPlugin
+api-version: '1.21'
+description: 멀티월드 관리 및 포탈 GUI 플러그인
+authors: [Exit]
+depend: [Core]
+softdepend: [MythicMobs]
+
+commands:
+  포탈:
+    description: 포탈 GUI를 엽니다
+    usage: /포탈
+  portal:
+    description: 포탈 GUI를 엽니다 (영문)
+    usage: /portal
+  던전마스터:
+    description: 던전 마스터 NPC 관리 (관리자)
+    usage: /던전마스터 <spawn|remove|setskin|reload> [args]

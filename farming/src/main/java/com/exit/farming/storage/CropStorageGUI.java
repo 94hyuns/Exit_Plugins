@@ -1,0 +1,306 @@
+package com.exit.farming.storage;
+
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.plugin.Plugin;
+
+import java.util.List;
+
+/**
+ * 농부 보관함 GUI. 6행 chest, 페이지네이션 지원 (Lv8 부터 4페이지).
+ *
+ * <p>레이아웃:
+ * <ul>
+ *   <li>슬롯 1: 자동 재심기 토글 (Lv10 perk)</li>
+ *   <li>슬롯 4: 안내 (NAME_TAG)</li>
+ *   <li>슬롯 7: 자동수집 토글</li>
+ *   <li>그 외 0-8: GRAY_STAINED_GLASS_PANE 분리</li>
+ *   <li>슬롯 9~44: 저장 슬롯 (페이지 슬롯 0~35)</li>
+ *   <li>슬롯 45: 이전 페이지 (PAPER + CMD 5)</li>
+ *   <li>슬롯 46~52: 저장 슬롯 (페이지 슬롯 36~42)</li>
+ *   <li>슬롯 53: 다음 페이지 (PAPER + CMD 6)</li>
+ * </ul>
+ */
+public class CropStorageGUI {
+
+    public static final int STORAGE_OFFSET = 9;
+    public static final int SLOT_TOGGLE = 7;
+    public static final int SLOT_REPLANT = 1;
+    public static final int SLOT_PREV_PAGE = 45;
+    public static final int SLOT_NEXT_PAGE = 53;
+    public static final NamespacedKey ACTION_KEY =
+            NamespacedKey.fromString("farming:crop_storage_action");
+
+    private final Plugin plugin;
+    private final CropStorageManager manager;
+
+    public CropStorageGUI(Plugin plugin, CropStorageManager manager) {
+        this.plugin = plugin;
+        this.manager = manager;
+    }
+
+    /** 페이지 슬롯 인덱스 (0..42) → GUI 슬롯. */
+    public static int pageSlotToGuiSlot(int pageSlot) {
+        if (pageSlot < 0) return -1;
+        if (pageSlot < 36) return STORAGE_OFFSET + pageSlot;       // 9..44
+        if (pageSlot < 43) return 46 + (pageSlot - 36);             // 46..52
+        return -1;
+    }
+
+    /** GUI 슬롯 → 페이지 슬롯 인덱스. nav/UI 등 비저장 슬롯은 -1. */
+    public static int guiSlotToPageSlot(int guiSlot) {
+        if (guiSlot >= STORAGE_OFFSET && guiSlot <= 44) return guiSlot - STORAGE_OFFSET;
+        if (guiSlot >= 46 && guiSlot <= 52) return 36 + (guiSlot - 46);
+        return -1;
+    }
+
+    public void open(Player player) {
+        Holder holder = new Holder(player.getUniqueId());
+        holder.setData(manager.load(player.getUniqueId()));
+        holder.setCurrentPage(0);
+        renderInto(holder, player);
+    }
+
+    /** Holder 의 현재 페이지 / data 를 새 Inventory 로 렌더링하고 플레이어에게 오픈. */
+    public void renderInto(Holder holder, Player player) {
+        Inventory inv = Bukkit.createInventory(holder, 54,
+                Component.text("농부의 보관함")
+                        .color(NamedTextColor.GREEN)
+                        .decoration(TextDecoration.ITALIC, false)
+                        .decoration(TextDecoration.BOLD, false));
+        holder.bind(inv);
+
+        int totalPages = manager.pagesFor(player.getUniqueId());
+        int page = Math.max(0, Math.min(holder.getCurrentPage(), totalPages - 1));
+        holder.setCurrentPage(page);
+
+        // ─── 상단 UI (0~8) ───
+        ItemStack info = new ItemStack(Material.NAME_TAG);
+        ItemMeta im = info.getItemMeta();
+        im.displayName(Component.text("사용 안내")
+                .color(NamedTextColor.GREEN)
+                .decoration(TextDecoration.ITALIC, false));
+        im.lore(List.of(
+                Component.text("작물만 보관 가능").color(NamedTextColor.GRAY)
+                        .decoration(TextDecoration.ITALIC, false),
+                Component.text("닫으면 자동 저장").color(NamedTextColor.GRAY)
+                        .decoration(TextDecoration.ITALIC, false),
+                Component.text("작물 상인에서 일괄 판매").color(NamedTextColor.GRAY)
+                        .decoration(TextDecoration.ITALIC, false),
+                Component.text("페이지 " + (page + 1) + " / " + totalPages)
+                        .color(NamedTextColor.GREEN)
+                        .decoration(TextDecoration.ITALIC, false)
+        ));
+        info.setItemMeta(im);
+        inv.setItem(4, info);
+
+        for (int i = 0; i < 9; i++) {
+            if (i == 4 || i == SLOT_TOGGLE || i == SLOT_REPLANT) continue;
+            inv.setItem(i, panel());
+        }
+        int farmerLevel = queryFarmerLevel(player.getUniqueId());
+        inv.setItem(SLOT_TOGGLE, toggleButton(
+                manager.isAutoCollect(player.getUniqueId()), farmerLevel));
+        inv.setItem(SLOT_REPLANT, replantButton(
+                manager.isAutoReplant(player.getUniqueId()), farmerLevel));
+
+        // ─── 페이지 저장 슬롯 (43개) ───
+        ItemStack[] data = holder.getData();
+        int pageStart = page * CropStorageManager.PAGE_SIZE;
+        for (int i = 0; i < CropStorageManager.PAGE_SIZE; i++) {
+            int guiSlot = pageSlotToGuiSlot(i);
+            int dataIdx = pageStart + i;
+            if (data != null && dataIdx < data.length) {
+                inv.setItem(guiSlot, data[dataIdx]);
+            }
+        }
+
+        // ─── nav 버튼 ───
+        inv.setItem(SLOT_PREV_PAGE, navButton(page > 0, true, page, totalPages));
+        inv.setItem(SLOT_NEXT_PAGE, navButton(page < totalPages - 1, false, page, totalPages));
+
+        player.openInventory(inv);
+    }
+
+    /** 현재 GUI 의 페이지 슬롯들을 Holder.data 의 해당 구간으로 dump. */
+    public static void dumpPageToData(Holder holder, Inventory inv) {
+        if (inv == null) return;
+        int page = holder.getCurrentPage();
+        int pageStart = page * CropStorageManager.PAGE_SIZE;
+        ItemStack[] data = holder.getData();
+        if (data == null) return;
+        for (int i = 0; i < CropStorageManager.PAGE_SIZE; i++) {
+            int dataIdx = pageStart + i;
+            if (dataIdx >= data.length) break;
+            ItemStack s = inv.getItem(pageSlotToGuiSlot(i));
+            data[dataIdx] = (s == null || s.getType().isAir()) ? null : s;
+        }
+    }
+
+    private ItemStack navButton(boolean active, boolean prev, int curPage, int totalPages) {
+        // 활성: PAPER + Shop 과 동일한 CMD (prev=5 / next=6) — 리소스팩 모델 공유.
+        Material mat = active ? Material.PAPER : Material.GRAY_STAINED_GLASS_PANE;
+        ItemStack stack = new ItemStack(mat);
+        ItemMeta meta = stack.getItemMeta();
+        if (active) {
+            meta.setCustomModelData(prev ? 5 : 6);
+        }
+        String label = prev ? "이전 페이지" : "다음 페이지";
+        meta.displayName(Component.text(label)
+                .color(active ? NamedTextColor.YELLOW : NamedTextColor.DARK_GRAY)
+                .decoration(TextDecoration.ITALIC, false)
+                .decoration(TextDecoration.BOLD, false));
+        meta.lore(List.of(
+                Component.text("(" + (curPage + 1) + " / " + totalPages + ")")
+                        .color(NamedTextColor.GRAY)
+                        .decoration(TextDecoration.ITALIC, false),
+                Component.text(active ? "클릭으로 이동" : "더 이상 페이지 없음")
+                        .color(NamedTextColor.DARK_GRAY)
+                        .decoration(TextDecoration.ITALIC, false)
+        ));
+        meta.getPersistentDataContainer().set(ACTION_KEY,
+                PersistentDataType.STRING, prev ? "PAGE_PREV" : "PAGE_NEXT");
+        stack.setItemMeta(meta);
+        return stack;
+    }
+
+    private ItemStack panel() {
+        ItemStack stack = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
+        ItemMeta meta = stack.getItemMeta();
+        meta.displayName(Component.text(" "));
+        stack.setItemMeta(meta);
+        return stack;
+    }
+
+    /** listener 가 in-place 갱신용으로 호출 (복사 버그 방지). uuid 로 farmerLevel 자동 조회. */
+    public ItemStack buildToggleButton(boolean on, java.util.UUID uuid) {
+        return toggleButton(on, queryFarmerLevel(uuid));
+    }
+
+    /** listener 가 in-place 갱신용으로 호출. */
+    public ItemStack buildReplantButton(boolean on, java.util.UUID uuid) {
+        return replantButton(on, queryFarmerLevel(uuid));
+    }
+
+    /**
+     * 자동 재심기 토글 버튼 (농부 Lv10 perk).
+     * - OFF: GRAY_DYE
+     * - ON + Lv10 미만: GRAY_DYE + 안내문구 (Lv10 부터 활성)
+     * - ON + Lv10+: WHEAT_SEEDS (활성)
+     */
+    private ItemStack replantButton(boolean on, int farmerLevel) {
+        boolean unlocked = farmerLevel >= 10;
+        Material mat;
+        String stateLine;
+        if (!unlocked) {
+            mat = Material.GRAY_DYE;
+            stateLine = "§7농부 §eLv.10§7 부터 활성";
+        } else if (on) {
+            mat = Material.WHEAT_SEEDS;
+            stateLine = "§a괭이 수확 시 동일 씨앗 자동 재심기";
+        } else {
+            mat = Material.GRAY_DYE;
+            stateLine = "§7재심기 비활성 — 직접 심어야 함";
+        }
+
+        ItemStack stack = new ItemStack(mat);
+        ItemMeta meta = stack.getItemMeta();
+        meta.displayName(Component.text("자동 재심기: ")
+                .color(NamedTextColor.GOLD)
+                .append(Component.text(unlocked ? (on ? "켜짐" : "꺼짐") : "잠김")
+                        .color(unlocked
+                                ? (on ? NamedTextColor.GREEN : NamedTextColor.RED)
+                                : NamedTextColor.DARK_GRAY))
+                .decoration(TextDecoration.ITALIC, false)
+                .decoration(TextDecoration.BOLD, false));
+        meta.lore(List.of(
+                Component.text(stateLine)
+                        .decoration(TextDecoration.ITALIC, false),
+                Component.text(unlocked ? "클릭하여 " + (on ? "끄기" : "켜기") : " ")
+                        .color(NamedTextColor.GRAY)
+                        .decoration(TextDecoration.ITALIC, false),
+                Component.text("씨앗은 보관함 → 인벤 순으로 차감")
+                        .color(NamedTextColor.DARK_GRAY)
+                        .decoration(TextDecoration.ITALIC, false)
+        ));
+        meta.getPersistentDataContainer().set(ACTION_KEY,
+                PersistentDataType.STRING, "TOGGLE_AUTO_REPLANT");
+        stack.setItemMeta(meta);
+        return stack;
+    }
+
+    private ItemStack toggleButton(boolean on, int farmerLevel) {
+        Material mat;
+        String rangeLine;
+        if (!on) {
+            mat = Material.GRAY_DYE;
+            rangeLine = "클릭해서 켜기";
+        } else if (farmerLevel >= 6) {
+            mat = Material.LIGHT_BLUE_DYE;
+            rangeLine = "범위: §b10x10 §7(광역 수집)";
+        } else {
+            mat = Material.LIME_DYE;
+            rangeLine = "범위: §a기본 픽업 §7(농부 Lv6 부터 확장)";
+        }
+
+        ItemStack stack = new ItemStack(mat);
+        ItemMeta meta = stack.getItemMeta();
+        meta.displayName(Component.text("자동 수집: ")
+                .color(NamedTextColor.GOLD)
+                .append(Component.text(on ? "켜짐" : "꺼짐")
+                        .color(on ? NamedTextColor.GREEN : NamedTextColor.RED))
+                .decoration(TextDecoration.ITALIC, false)
+                .decoration(TextDecoration.BOLD, false));
+        meta.lore(List.of(
+                Component.text(on ? "작물/씨앗이 보관함으로 직접 들어감" : rangeLine)
+                        .color(NamedTextColor.GRAY)
+                        .decoration(TextDecoration.ITALIC, false),
+                Component.text(on ? "§7" + rangeLine : " ")
+                        .decoration(TextDecoration.ITALIC, false),
+                Component.text("EXP 는 정상 부여").color(NamedTextColor.DARK_GRAY)
+                        .decoration(TextDecoration.ITALIC, false)
+        ));
+        meta.getPersistentDataContainer().set(ACTION_KEY,
+                PersistentDataType.STRING, "TOGGLE_AUTO_COLLECT");
+        stack.setItemMeta(meta);
+        return stack;
+    }
+
+    /** JobProvider 미설치/에러 시 0 반환. */
+    private static int queryFarmerLevel(java.util.UUID uuid) {
+        try {
+            var jobs = com.exit.core.registry.ServiceRegistry
+                    .get(com.exit.core.api.JobProvider.class).orElse(null);
+            if (jobs == null) return 0;
+            return jobs.getLevel(uuid, "farmer");
+        } catch (Throwable t) {
+            return 0;
+        }
+    }
+
+    /** GUI 식별용 InventoryHolder. 페이지네이션 상태 (currentPage + data) 보유. */
+    public static class Holder implements InventoryHolder {
+        private final java.util.UUID owner;
+        private Inventory inv;
+        private int currentPage = 0;
+        private ItemStack[] data;
+        public Holder(java.util.UUID owner) { this.owner = owner; }
+        public void bind(Inventory inv) { this.inv = inv; }
+        public java.util.UUID getOwner() { return owner; }
+        @Override public Inventory getInventory() { return inv; }
+        public int getCurrentPage() { return currentPage; }
+        public void setCurrentPage(int page) { this.currentPage = page; }
+        public ItemStack[] getData() { return data; }
+        public void setData(ItemStack[] data) { this.data = data; }
+    }
+}

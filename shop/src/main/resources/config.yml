@@ -1,0 +1,1002 @@
+# ═══════════════════════════════════════════════════════════════════
+# Shop 플러그인 v1.3.1 — 상점 아이템 카탈로그
+# ═══════════════════════════════════════════════════════════════════
+
+# ─── 시세 누적 폭락 트리거 ────────────────────────────────────────
+#   한 시세 타임 (≈20분) 안에 같은 아이템 누적 판매량 기준:
+#     - threshold-low  미만: 폭락 없음
+#     - low ~ high 사이: 거래 1회당 1번 확률 굴림 (선형 보간, low=0% ~ high=100%)
+#     - threshold-high 정수배 도달 분: 확정 폭락 N회 (top seller 표기)
+#   확률 폭락 발동 시 chunk 게이지 리셋. 확정 폭락은 high 단위로 차감.
+#   다음 시세 타임 시작 시 chunk 누적 초기화 + 자연 회복 시작.
+price-crash:
+  enabled: true
+  threshold-low: 640       # 10세트(64×10) — 이 양부터 확률적 폭락 시작 (0%)
+  threshold-high: 1600     # 25세트(64×25) — 100% 확률 + 1600 단위 결정적 추가 폭락
+  multiplier: 0.75         # 발동 시 현재 가격에 곱하기 (= 25% 인하)
+
+
+#
+# ─── 가격 모델 ─────────────────────────────────────────────────────
+#   buy 만 있음     → 구매 전용 (씨앗·티켓·램프). 가격 고정.
+#   sell 만 있음    → 판매 전용 (열매). 시세 변동.
+#                     구매가 = 판매가 × buy-multiplier 자동 계산.
+#   buy + sell 둘 다 있음 → 양방향 (광물 등). buy 값은 무시.
+#                     항상 sell × buy-multiplier 로 계산되어 차익거래 불가.
+#
+# ─── 필드 ──────────────────────────────────────────────────────────
+#   id              : 고유 식별자 (영소문자/숫자/_)
+#   category        : MINERAL / CROP / LAMP  (FISHING은 동적이라 등록 불가)
+#   material        : 바닐라 아이템 Material
+#   provider        : 커스텀 라우팅 ("Farming" / "CustomItems")
+#   type            : provider 내부 타입 (cropId / "FARMLAND_BLOCK" / "LIFE")
+#   buy             : 구매가 (구매 전용일 때만 사용)
+#   sell            : 판매가 base (판매 가능일 때 필수)
+#   buy-multiplier  : 품목별 배수. 미지정시 10.0. (sellable 항목에서만 의미)
+#   name            : 표시명
+#   icon            : GUI 아이콘 (provider 아이템의 fallback)
+#
+# ─── 작물 GUI 탭 ────────────────────────────────────────────────────
+#   provider=Farming + type=FARMLAND_BLOCK → 씨앗 탭
+#   provider=Farming + type=cropId + sell 없음 → 씨앗 탭 (구매 전용 씨앗)
+#   provider=Farming + type=cropId + sell 있음 → 열매 탭 (판매 전용 열매)
+# ═══════════════════════════════════════════════════════════════════
+
+# ─── GUI 버튼 스타일 ────────────────────────────────────────────────
+# 상점 GUI의 구매/판매 버튼 아이콘 커스터마이징.
+# - material: Bukkit Material 이름. 미지정시 디폴트 (글래스 페인) 유지.
+# - custom-model-data: 리소스팩 CMD 인덱스. 0이거나 미지정시 CMD 안 씀.
+#
+# 디폴트 (이 섹션 통째로 없으면):
+#   buy        = LIME_STAINED_GLASS_PANE      (초록 = 구매)
+#   sell       = RED_STAINED_GLASS_PANE       (빨강 = 판매)
+#   sell-all   = ORANGE_STAINED_GLASS_PANE    (주황 = 전체 판매)
+#   sell-disabled = GRAY_STAINED_GLASS_PANE   (회색 = 비활성)
+gui:
+  # 모두 PAPER + CMD 매핑 (shop_buttons_pack_v3 리소스팩 적용 시 커스텀 텍스처)
+  # 리소스팩 미적용 시 일반 종이로 보임 — 기능 동작엔 영향 없음
+  buy-button:
+    material: PAPER
+    custom-model-data: 1
+  sell-button:
+    material: PAPER
+    custom-model-data: 2
+  sell-all-button:
+    material: PAPER
+    custom-model-data: 3
+  sell-disabled:
+    material: PAPER
+    custom-model-data: 4
+
+  # 네비게이션 버튼 (페이지 이동 / 닫기)
+  nav-prev:
+    material: PAPER
+    custom-model-data: 5
+  nav-next:
+    material: PAPER
+    custom-model-data: 6
+  nav-close:
+    material: BARRIER
+    custom-model-data: 0
+
+# ─── GUI 탭 설정 ────────────────────────────────────────────────────
+# 카테고리별로 GUI 상단에 탭 버튼을 배치. 탭 미설정 카테고리는 단일 페이지 모드.
+#
+# 각 탭 항목:
+#   id                : 탭 식별자 (영문 대문자, 같은 카테고리 내 고유)
+#   name              : 표시명 (§a 같은 색상 코드 사용 가능)
+#   slot              : 0행에서 표시될 슬롯 (0~8). 같은 카테고리 내 중복 금지.
+#   default           : 카테고리 첫 진입 시 이 탭으로 열림 (선택, 없으면 첫 번째 탭)
+#   filter            : 탭에 표시될 ShopItem 필터 (variants/materials/ids 중 하나라도 매칭)
+#                       - variants: ShopItem.variant 매칭 (Farming용. SEED/FRUIT/TICKET)
+#                       - materials: Material 이름 리스트 (광물 분류 등)
+#                       - ids: 명시적 id 리스트
+#                       비어있으면 카테고리의 모든 아이템 표시
+#
+# 아이콘 — 두 가지 모드 (우선순위 순):
+#   1) provider 모드: 외부 플러그인의 진짜 아이템을 발급해 사용 (PDC + CMD 자동)
+#      icon-provider : "Farming" 또는 "CustomItems"
+#      icon-type     : provider 내부 타입 (cropId, "FARMLAND_BLOCK", "LIFE" 등)
+#      icon-variant  : "SEED" / "FRUIT" / "TICKET" (Farming만 의미)
+#      → 본문 아이템과 동일 텍스처 보장
+#
+#   2) Material 모드: 단순 Material + 선택적 CMD
+#      icon              : Bukkit Material 이름
+#      custom-model-data : 리소스팩 CMD 인덱스 (선택, 0이면 미적용)
+#
+#   provider 모드를 쓸 때 icon 필드도 함께 두면 provider 실패 시 fallback 됨.
+tabs:
+  CROP:
+    - id: SEED
+      name: "§a씨앗 / 경작지"
+      icon-provider: Farming    # CropItemProvider 통해 진짜 밀 씨앗 발급 → 본문과 동일 텍스처
+      icon-type: wheat          # cropId
+      icon-variant: SEED        # SEED / FRUIT / TICKET
+      icon: WHEAT_SEEDS         # provider 실패 시 fallback
+      slot: 2
+      default: true
+      filter:
+        variants: [SEED, TICKET]
+
+    - id: FRUIT
+      name: "§e열매"
+      icon-provider: Farming    # CropItemProvider 통해 진짜 밀 발급
+      icon-type: wheat
+      icon-variant: FRUIT
+      icon: WHEAT               # provider 실패 시 fallback
+      slot: 6
+      filter:
+        variants: [FRUIT]
+
+    - id: TOOL
+      name: "§b농사도구"
+      icon: WOODEN_HOE
+      slot: 4
+      filter:
+        ids: [watering_can_copper, watering_can_iron, watering_can_diamond,
+              sprinkler_iron]
+
+  GENERAL:
+    - id: CONSUMABLE
+      name: "§e소모품"
+      icon: FIREWORK_ROCKET
+      slot: 2
+      default: true
+      filter:
+        ids: [bigmac, firework, inv_save, string, heavy_core,
+              golden_apple, enchanted_golden_apple, arrow, flint_and_steel]
+
+    - id: WEAPON_ENCH
+      name: "§c무기 인챈트"
+      icon: DIAMOND_SWORD
+      slot: 5
+      filter:
+        ids: [ench_sharpness5, ench_smite5, ench_sweeping3, ench_looting3,
+              ench_lunge3, ench_impaling5, ench_channeling, ench_riptide3,
+              ench_wind_burst3, ench_density5, ench_breach4, ench_loyalty3,
+              ench_fire_aspect2, ench_flame,
+              ench_infinity, ench_power5]
+
+    - id: OTHER_ENCH
+      name: "§b도구·방어구 인챈트"
+      icon: DIAMOND_PICKAXE
+      slot: 7
+      filter:
+        ids: [ench_efficiency5, ench_fortune3, ench_unbreaking3, ench_mending,
+              ench_protection4, ench_feather_falling4, ench_depth_strider3,
+              ench_soul_speed3, ench_aqua_affinity, ench_respiration3, ench_lure3]
+
+  # MINERAL / LAMP 는 탭 미설정 → 단일 페이지 모드 (기존 동작 유지)
+  # 추후 광물도 분류하고 싶으면 여기에 추가:
+  # MINERAL:
+  #   - id: ORE
+  #     name: "§7원광"
+  #     icon: RAW_IRON
+  #     slot: 2
+  #     default: true
+  #     filter:
+  #       materials: [COAL, RAW_IRON, RAW_GOLD, RAW_COPPER, ...]
+  #   - id: INGOT
+  #     name: "§e주괴"
+  #     ...
+
+items:
+
+# ────────────────────────────── 광물 (MINERAL) ──────────────────────────────
+#   sell만 명시. buy = sell × 10 자동.
+
+  - id: coal
+    category: MINERAL
+    material: COAL
+    sell: 5
+    buy-multiplier: 10.0
+    name: "석탄"
+
+  - id: iron_ingot
+    category: MINERAL
+    material: IRON_INGOT
+    sell: 12
+    buy-multiplier: 10.0
+    name: "철 주괴"
+
+  - id: iron_block
+    category: MINERAL
+    material: IRON_BLOCK
+    sell: 108
+    buy-multiplier: 10.0
+    name: "철 블록"
+
+  - id: gold_ingot
+    category: MINERAL
+    material: GOLD_INGOT
+    sell: 25
+    buy-multiplier: 10.0
+    name: "금 주괴"
+
+  - id: gold_block
+    category: MINERAL
+    material: GOLD_BLOCK
+    sell: 225
+    buy-multiplier: 10.0
+    name: "금 블록"
+
+  - id: copper_ingot
+    category: MINERAL
+    material: COPPER_INGOT
+    sell: 4
+    buy-multiplier: 10.0
+    name: "구리 주괴"
+
+  - id: copper_block
+    category: MINERAL
+    material: COPPER_BLOCK
+    sell: 36
+    buy-multiplier: 10.0
+    name: "구리 블록"
+
+  - id: oxidized_copper
+    category: MINERAL
+    material: OXIDIZED_COPPER
+    sell: 36
+    buy-multiplier: 10.0
+    name: "산화된 구리 블록"
+
+  - id: diamond
+    category: MINERAL
+    material: DIAMOND
+    sell: 120
+    buy-multiplier: 10.0
+    name: "다이아몬드"
+
+  - id: diamond_block
+    category: MINERAL
+    material: DIAMOND_BLOCK
+    sell: 1080
+    buy-multiplier: 10.0
+    name: "다이아 블록"
+
+  - id: emerald
+    category: MINERAL
+    material: EMERALD
+    sell: 90
+    buy-multiplier: 10.0
+    name: "에메랄드"
+
+  - id: lapis
+    category: MINERAL
+    material: LAPIS_LAZULI
+    sell: 8
+    buy-multiplier: 10.0
+    name: "청금석"
+
+  - id: redstone
+    category: MINERAL
+    material: REDSTONE
+    sell: 6
+    buy-multiplier: 10.0
+    name: "레드스톤"
+
+  - id: quartz
+    category: MINERAL
+    material: QUARTZ
+    sell: 10
+    buy-multiplier: 10.0
+    name: "석영"
+
+  - id: amethyst
+    category: MINERAL
+    material: AMETHYST_SHARD
+    sell: 14
+    buy-multiplier: 10.0
+    name: "자수정 조각"
+
+  - id: netherite_ingot
+    category: MINERAL
+    material: NETHERITE_INGOT
+    sell: 500
+    buy-multiplier: 10.0
+    name: "네더라이트 주괴"
+
+# ────────────────────────────── 작물 — 씨앗 탭 ──────────────────────────────
+# 씨앗 13종 (구매 전용) + 경작지 블록 1개
+
+  - id: farmland_block
+    category: CROP
+    provider: Farming
+    type: FARMLAND_BLOCK
+    buy: 500
+    name: "경작지 블록"
+    icon: DIRT
+
+  - id: wheat_seed
+    category: CROP
+    provider: Farming
+    type: wheat
+    buy: 50
+    name: "밀 씨앗"
+    icon: WHEAT_SEEDS
+
+  - id: potato_seed
+    category: CROP
+    provider: Farming
+    type: potato
+    buy: 50
+    name: "감자 씨앗"
+    icon: WHEAT_SEEDS
+
+  - id: beetroot_seed
+    category: CROP
+    provider: Farming
+    type: beetroot
+    buy: 60
+    name: "비트 씨앗"
+    icon: WHEAT_SEEDS
+
+  - id: carrot_seed
+    category: CROP
+    provider: Farming
+    type: carrot
+    buy: 55
+    name: "당근 씨앗"
+    icon: WHEAT_SEEDS
+
+  - id: grape_seed
+    category: CROP
+    provider: Farming
+    type: grape
+    buy: 150
+    name: "포도 씨앗"
+    icon: WHEAT_SEEDS
+
+  - id: blueberry_seed
+    category: CROP
+    provider: Farming
+    type: blueberry
+    buy: 180
+    name: "블루베리 씨앗"
+    icon: WHEAT_SEEDS
+
+  - id: cauliflower_seed
+    category: CROP
+    provider: Farming
+    type: cauliflower
+    buy: 75
+    name: "콜리플라워 씨앗"
+    icon: WHEAT_SEEDS
+
+  - id: corn_seed
+    category: CROP
+    provider: Farming
+    type: corn
+    buy: 85
+    name: "옥수수 씨앗"
+    icon: WHEAT_SEEDS
+
+  - id: cranberry_seed
+    category: CROP
+    provider: Farming
+    type: cranberry
+    buy: 160
+    name: "크랜베리 씨앗"
+    icon: WHEAT_SEEDS
+
+  - id: garlic_seed
+    category: CROP
+    provider: Farming
+    type: garlic
+    buy: 100
+    name: "마늘 씨앗"
+    icon: WHEAT_SEEDS
+
+  - id: leek_seed
+    category: CROP
+    provider: Farming
+    type: leek
+    buy: 110
+    name: "대파 씨앗"
+    icon: WHEAT_SEEDS
+
+  - id: pea_seed
+    category: CROP
+    provider: Farming
+    type: pea
+    buy: 125
+    name: "완두콩 씨앗"
+    icon: WHEAT_SEEDS
+
+  - id: tomato_seed
+    category: CROP
+    provider: Farming
+    type: tomato
+    buy: 135
+    name: "토마토 씨앗"
+    icon: WHEAT_SEEDS
+
+# ────────────────────────────── 작물 — 농사도구 탭 ──────────────────────────────
+# 물뿌리개(BUCKET 베이스) + 스프링쿨러(BARREL 베이스). 구매 전용. provider=WaterTool.
+# typeId = "wateringcan_<tier>" / "sprinkler_<tier>"
+
+  - id: watering_can_copper
+    category: CROP
+    provider: WaterTool
+    bulk-buy-disabled: true
+    type: wateringcan_copper
+    buy: 800
+    name: "구리 물뿌리개"
+    icon: BUCKET
+
+  - id: watering_can_iron
+    category: CROP
+    provider: WaterTool
+    bulk-buy-disabled: true
+    type: wateringcan_iron
+    buy: 3500
+    name: "철 물뿌리개"
+    icon: BUCKET
+
+  - id: watering_can_diamond
+    category: CROP
+    provider: WaterTool
+    bulk-buy-disabled: true
+    type: wateringcan_diamond
+    buy: 12000
+    name: "다이아 물뿌리개"
+    icon: BUCKET
+
+  - id: sprinkler_iron
+    category: CROP
+    provider: WaterTool
+    bulk-buy-disabled: true
+    type: sprinkler_iron
+    buy: 20000
+    name: "철 스프링클러"
+    icon: BARREL
+
+# ────────────────────────────── 작물 — 열매 탭 ──────────────────────────────
+# 열매 13종 (판매 전용). buy 필드 없음 — 구매 불가.
+# (씨앗 가격에 비해 sell이 낮게 책정 → 양식해도 손해는 안 보지만 일확천금은 어렵게)
+
+  - id: wheat_fruit
+    category: CROP
+    provider: Farming
+    type: wheat
+    sell: 10
+    buy-multiplier: 10.0
+    buy-disabled: true
+    name: "밀"
+    icon: BEETROOT
+
+  - id: potato_fruit
+    category: CROP
+    provider: Farming
+    type: potato
+    sell: 10
+    buy-multiplier: 10.0
+    buy-disabled: true
+    name: "감자"
+    icon: BEETROOT
+
+  - id: beetroot_fruit
+    category: CROP
+    provider: Farming
+    type: beetroot
+    sell: 12
+    buy-multiplier: 10.0
+    buy-disabled: true
+    name: "비트"
+    icon: BEETROOT
+
+  - id: carrot_fruit
+    category: CROP
+    provider: Farming
+    type: carrot
+    sell: 11
+    buy-multiplier: 10.0
+    buy-disabled: true
+    name: "당근"
+    icon: BEETROOT
+
+  - id: grape_fruit
+    category: CROP
+    provider: Farming
+    type: grape
+    sell: 30
+    buy-multiplier: 10.0
+    buy-disabled: true
+    name: "포도"
+    icon: BEETROOT
+
+  - id: blueberry_fruit
+    category: CROP
+    provider: Farming
+    type: blueberry
+    sell: 35
+    buy-multiplier: 10.0
+    buy-disabled: true
+    name: "블루베리"
+    icon: BEETROOT
+
+  - id: cauliflower_fruit
+    category: CROP
+    provider: Farming
+    type: cauliflower
+    sell: 15
+    buy-multiplier: 10.0
+    buy-disabled: true
+    name: "콜리플라워"
+    icon: BEETROOT
+
+  - id: corn_fruit
+    category: CROP
+    provider: Farming
+    type: corn
+    sell: 17
+    buy-multiplier: 10.0
+    buy-disabled: true
+    name: "옥수수"
+    icon: BEETROOT
+
+  - id: cranberry_fruit
+    category: CROP
+    provider: Farming
+    type: cranberry
+    sell: 32
+    buy-multiplier: 10.0
+    buy-disabled: true
+    name: "크랜베리"
+    icon: BEETROOT
+
+  - id: garlic_fruit
+    category: CROP
+    provider: Farming
+    type: garlic
+    sell: 20
+    buy-multiplier: 10.0
+    buy-disabled: true
+    name: "마늘"
+    icon: BEETROOT
+
+  - id: leek_fruit
+    category: CROP
+    provider: Farming
+    type: leek
+    sell: 22
+    buy-multiplier: 10.0
+    buy-disabled: true
+    name: "대파"
+    icon: BEETROOT
+
+  - id: pea_fruit
+    category: CROP
+    provider: Farming
+    type: pea
+    sell: 25
+    buy-multiplier: 10.0
+    buy-disabled: true
+    name: "완두콩"
+    icon: BEETROOT
+
+  - id: tomato_fruit
+    category: CROP
+    provider: Farming
+    type: tomato
+    sell: 27
+    buy-multiplier: 10.0
+    buy-disabled: true
+    name: "토마토"
+    icon: BEETROOT
+
+# ────────────────────────────── 램프 (LAMP) ──────────────────────────────
+
+  - id: life_lamp
+    category: LAMP
+    provider: CustomItems
+    type: LIFE
+    buy: 1000
+    buy-price-16: 15000
+    name: "생활 램프"
+    icon: REDSTONE_LAMP
+
+  - id: combat_lamp
+    category: LAMP
+    provider: CustomItems
+    type: COMBAT
+    buy: 1000
+    buy-price-16: 15000
+    name: "전투 램프"
+    icon: SOUL_LANTERN
+
+  - id: mutation_lamp
+    category: LAMP
+    provider: CustomItems
+    type: MUTATION
+    buy: 100000
+    bulk-buy-disabled: true
+    name: "변성 램프"
+    icon: BOOK
+
+# ────────────────────────────── 잡화 (GENERAL) ──────────────────────────────
+# 잡화상인 NPC가 취급. 모두 구매 전용(고정 가격).
+#
+# 바닐라 ItemStack 위에 yml 메타 옵션을 얹어서 발급한다.
+#   display-name        : "&6빅맥" — & 색상 코드 사용 가능
+#   custom-model-data   : 리소스팩 CMD (양의 정수, 0/미지정시 미적용)
+#   enchantments        : ["sharpness:5", "mending:1"] 형식
+#                         ENCHANTED_BOOK 이면 자동으로 stored enchant로 들어감
+#   lore                : ["§7첫 줄", "§7둘째 줄"]
+#
+# 인챈트 키 이름은 마인크래프트 내부 키 기준(소문자):
+#   sharpness, mending, protection, efficiency, unbreaking, power,
+#   infinity, feather_falling, depth_strider, soul_speed, aqua_affinity,
+#   looting, fortune ...
+
+  - id: bigmac
+    category: GENERAL
+    provider: CustomConsumable
+    type: BIGMAC
+    buy: 80
+    name: "빅맥"
+    icon: COOKED_BEEF
+
+  - id: inv_save
+    category: GENERAL
+    provider: CustomConsumable
+    type: INV_SAVE
+    buy: 10000
+    name: "인벤세이브권"
+    icon: PAPER
+
+  - id: heavy_core
+    category: GENERAL
+    material: HEAVY_CORE
+    buy: 250000
+    bulk-buy-disabled: true
+    name: "무거운 코어"
+
+  - id: firework
+    category: GENERAL
+    material: FIREWORK_ROCKET
+    buy: 100
+    name: "폭죽"
+
+  - id: string
+    category: GENERAL
+    material: STRING
+    buy: 30
+    name: "실"
+
+  - id: golden_apple
+    category: GENERAL
+    material: GOLDEN_APPLE
+    buy: 1000
+    name: "황금 사과"
+
+  - id: enchanted_golden_apple
+    category: GENERAL
+    material: ENCHANTED_GOLDEN_APPLE
+    buy: 5000
+    name: "마법이 부여된 황금 사과"
+
+  - id: arrow
+    category: GENERAL
+    material: ARROW
+    buy: 100
+    name: "화살"
+
+  - id: ench_sharpness5
+    category: GENERAL
+    material: ENCHANTED_BOOK
+    bulk-buy-disabled: true
+    buy: 4500
+    name: "날카로움 V"
+    enchantments: ["sharpness:5"]
+
+  - id: ench_mending
+    category: GENERAL
+    material: ENCHANTED_BOOK
+    bulk-buy-disabled: true
+    buy: 8000
+    name: "수선"
+    enchantments: ["mending:1"]
+
+  - id: ench_protection4
+    category: GENERAL
+    material: ENCHANTED_BOOK
+    bulk-buy-disabled: true
+    buy: 4500
+    name: "보호 IV"
+    enchantments: ["protection:4"]
+
+  - id: ench_efficiency5
+    category: GENERAL
+    material: ENCHANTED_BOOK
+    bulk-buy-disabled: true
+    buy: 4000
+    name: "효율 V"
+    enchantments: ["efficiency:5"]
+
+  - id: ench_unbreaking3
+    category: GENERAL
+    material: ENCHANTED_BOOK
+    bulk-buy-disabled: true
+    buy: 3000
+    name: "내구성 III"
+    enchantments: ["unbreaking:3"]
+
+  - id: ench_power5
+    category: GENERAL
+    material: ENCHANTED_BOOK
+    bulk-buy-disabled: true
+    buy: 4000
+    name: "힘 V"
+    enchantments: ["power:5"]
+
+  - id: ench_infinity
+    category: GENERAL
+    material: ENCHANTED_BOOK
+    bulk-buy-disabled: true
+    buy: 6000
+    name: "무한"
+    enchantments: ["infinity:1"]
+
+  - id: ench_feather_falling4
+    category: GENERAL
+    material: ENCHANTED_BOOK
+    bulk-buy-disabled: true
+    buy: 3000
+    name: "가벼운 착지 IV"
+    enchantments: ["feather_falling:4"]
+
+  - id: ench_depth_strider3
+    category: GENERAL
+    material: ENCHANTED_BOOK
+    bulk-buy-disabled: true
+    buy: 3500
+    name: "물갈퀴 III"
+    enchantments: ["depth_strider:3"]
+
+  - id: ench_soul_speed3
+    category: GENERAL
+    material: ENCHANTED_BOOK
+    bulk-buy-disabled: true
+    buy: 3500
+    name: "영혼 가속 III"
+    enchantments: ["soul_speed:3"]
+
+  - id: ench_aqua_affinity
+    category: GENERAL
+    material: ENCHANTED_BOOK
+    bulk-buy-disabled: true
+    buy: 3000
+    name: "친수성"
+    enchantments: ["aqua_affinity:1"]
+
+  - id: ench_looting3
+    category: GENERAL
+    material: ENCHANTED_BOOK
+    bulk-buy-disabled: true
+    buy: 4500
+    name: "약탈 III"
+    enchantments: ["looting:3"]
+
+  - id: ench_fortune3
+    category: GENERAL
+    material: ENCHANTED_BOOK
+    bulk-buy-disabled: true
+    buy: 5000
+    name: "행운 III"
+    enchantments: ["fortune:3"]
+
+  - id: ench_lure3
+    category: GENERAL
+    material: ENCHANTED_BOOK
+    bulk-buy-disabled: true
+    buy: 3000
+    name: "미끼 III"
+    enchantments: ["lure:3"]
+
+  # ── 신규 무기 인챈트북 ──
+
+  - id: ench_smite5
+    category: GENERAL
+    material: ENCHANTED_BOOK
+    bulk-buy-disabled: true
+    buy: 4500
+    name: "강타 V"
+    enchantments: ["smite:5"]
+
+  - id: ench_sweeping3
+    category: GENERAL
+    material: ENCHANTED_BOOK
+    bulk-buy-disabled: true
+    buy: 4000
+    name: "휩쓸기 III"
+    enchantments: ["sweeping_edge:3"]
+
+  - id: ench_lunge3
+    category: GENERAL
+    material: ENCHANTED_BOOK
+    bulk-buy-disabled: true
+    buy: 4500
+    name: "돌진 III"
+    enchantments: ["lunge:3"]
+
+  - id: ench_impaling5
+    category: GENERAL
+    material: ENCHANTED_BOOK
+    bulk-buy-disabled: true
+    buy: 4500
+    name: "찌르기 V"
+    enchantments: ["impaling:5"]
+
+  - id: ench_channeling
+    category: GENERAL
+    material: ENCHANTED_BOOK
+    bulk-buy-disabled: true
+    buy: 5000
+    name: "집전"
+    enchantments: ["channeling:1"]
+
+  - id: ench_riptide3
+    category: GENERAL
+    material: ENCHANTED_BOOK
+    bulk-buy-disabled: true
+    buy: 4500
+    name: "급류 III"
+    enchantments: ["riptide:3"]
+
+  - id: ench_wind_burst3
+    category: GENERAL
+    material: ENCHANTED_BOOK
+    bulk-buy-disabled: true
+    buy: 5500
+    name: "돌풍 III"
+    enchantments: ["wind_burst:3"]
+
+  - id: ench_density5
+    category: GENERAL
+    material: ENCHANTED_BOOK
+    bulk-buy-disabled: true
+    buy: 5000
+    name: "육중 V"
+    enchantments: ["density:5"]
+
+  - id: ench_breach4
+    category: GENERAL
+    material: ENCHANTED_BOOK
+    bulk-buy-disabled: true
+    buy: 5500
+    name: "격파 IV"
+    enchantments: ["breach:4"]
+
+  - id: ench_loyalty3
+    category: GENERAL
+    material: ENCHANTED_BOOK
+    bulk-buy-disabled: true
+    buy: 4000
+    name: "충성심 III"
+    enchantments: ["loyalty:3"]
+
+  - id: ench_fire_aspect2
+    category: GENERAL
+    material: ENCHANTED_BOOK
+    bulk-buy-disabled: true
+    buy: 3500
+    name: "발화 II"
+    enchantments: ["fire_aspect:2"]
+
+  - id: ench_flame
+    category: GENERAL
+    material: ENCHANTED_BOOK
+    bulk-buy-disabled: true
+    buy: 3500
+    name: "화염"
+    enchantments: ["flame:1"]
+
+  # ── 신규 도구·방어구 인챈트북 ──
+
+  - id: ench_respiration3
+    category: GENERAL
+    material: ENCHANTED_BOOK
+    bulk-buy-disabled: true
+    buy: 3500
+    name: "호흡 III"
+    enchantments: ["respiration:3"]
+
+  - id: flint_and_steel
+    category: GENERAL
+    material: FLINT_AND_STEEL
+    buy: 1000
+    name: "부싯돌과 부시"
+
+# ────────────────────────────── 던전 (DUNGEON) ──────────────────────────────
+# 던전 매입소 — 던전 전리품을 NPC가 매입. 판매 전용(buy-disabled).
+# 가격은 광물/작물처럼 수요·공급에 따라 변동.
+
+  - id: brown_mushroom
+    category: DUNGEON
+    material: BROWN_MUSHROOM
+    sell: 10
+    buy-multiplier: 10.0
+    buy-disabled: true
+    name: "갈색 버섯"
+
+  - id: red_mushroom
+    category: DUNGEON
+    material: RED_MUSHROOM
+    sell: 20
+    buy-multiplier: 10.0
+    buy-disabled: true
+    name: "빨간 버섯"
+
+# ─── 요리 상인 ───
+# Cooking Pack 연동: 우리 작물로 못 채우는 동물성·가공품 재료 8종을 NPC가 판매.
+# 구매 전용 (sell 없음 → sellable=false). 가격은 작물 평균(100w 수준) 대비 약 2~8배.
+
+  - id: cook_beef
+    category: COOKING
+    material: BEEF
+    buy: 500
+    name: "소고기"
+
+  - id: cook_pork
+    category: COOKING
+    material: PORKCHOP
+    buy: 500
+    name: "돼지고기"
+
+  - id: cook_chicken
+    category: COOKING
+    material: CHICKEN
+    buy: 400
+    name: "닭고기"
+
+  - id: cook_sugar
+    category: COOKING
+    material: SUGAR
+    buy: 300
+    name: "설탕"
+
+  - id: cook_milk
+    category: COOKING
+    material: MILK_BUCKET
+    buy: 800
+    name: "우유 (양동이)"
+
+  - id: cook_egg
+    category: COOKING
+    material: EGG
+    buy: 200
+    name: "계란"
+
+  - id: cook_honey
+    category: COOKING
+    material: HONEY_BOTTLE
+    buy: 700
+    name: "꿀병"
+
+  - id: cook_cocoa
+    category: COOKING
+    material: COCOA_BEANS
+    buy: 400
+    name: "코코아 콩"
+
+  # 요리솥 소환 알 — MythicMobs item (PIG_SPAWN_EGG base + CMD 1).
+  # 우클릭으로 cooking_pot mob 스폰 → flint and steel 로 점화 후 요리 진행.
+  - id: cooking_pot
+    category: COOKING
+    provider: MythicMobs
+    type: cooking_pot
+    buy: 10000
+    name: "요리솥 소환 알"
+    icon: PIG_SPAWN_EGG
+
+# ─── 위치이동석 (보류) ───
+# CustomItems 플러그인에 구현되면 아래 형태로 추가:
+#   - id: warp_stone
+#     category: GENERAL
+#     provider: CustomConsumable
+#     type: WARP_STONE
+#     buy: 5000
+#     name: "위치이동석"
+#     icon: ENDER_PEARL

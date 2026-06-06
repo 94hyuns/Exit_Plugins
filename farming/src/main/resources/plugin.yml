@@ -1,0 +1,26 @@
+name: Farming
+version: 1.11.2
+main: com.exit.farming.FarmingPlugin
+api-version: 1.21
+author: exit
+depend: [Core]
+softdepend: [Job, MythicMobs]
+commands:
+  씨앗모음:
+    description: 13작물 씨앗 지급 (OP)
+    usage: /씨앗모음
+  과일모음:
+    description: 13작물 열매 지급 (OP)
+    usage: /과일모음
+  경작지정보:
+    description: 바라보는 경작지 클레임 정보 조회
+    usage: /경작지정보
+  물뿌리개:
+    description: 물뿌리개 지급 (OP)
+    usage: /물뿌리개 [구리|철|다이아]
+  스프링쿨러:
+    description: 스프링쿨러 지급 (OP)
+    usage: /스프링쿨러 [구리|철|다이아]
+permissions:
+  farming.admin:
+    default: op

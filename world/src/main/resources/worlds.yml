@@ -1,0 +1,198 @@
+# 월드별 규칙 설정
+# world-name: 실제 서버 월드 폴더명과 일치해야 함
+
+worlds:
+  village:
+    world-name: "world_village"
+    display-name: "마을"
+    monster-spawn: false
+    pvp: false
+    flat: false
+    biome: "THE_VOID"
+    border-size: 400
+    border-center:
+      x: 38.8
+      z: 44.3
+    spawn-location:
+      x: 94.2
+      y: 64.5
+      z: 52
+    description: "안전한 생활 공간."
+    warning: ""
+    protection:
+      block-break: false
+      block-place: false
+      block-interact: false
+      land-override: true       # 내 청크에서만 상호작용 가능
+
+  wild:
+    world-name: "world_wild"
+    display-name: "야생"
+    monster-spawn: true
+    pvp: false
+    flat: false
+    biome: ""
+    border-size: 0
+    spawn-location:
+      x: 0.5
+      y: 64.0
+      z: 0.5
+    description: "자원을 모으는 야생 지역."
+    warning: ""
+    protection:
+      block-break: true
+      block-place: true
+      block-interact: true
+      land-override: false      # 야생은 자유 — 클레임 보호 불필요
+
+  dungeon:
+    world-name: "world_dungeon"
+    display-name: "던전"
+    monster-spawn: true
+    pvp: false
+    flat: true
+    biome: "THE_VOID"
+    border-size: 1200
+    auto-cleanup-on-empty: true   # 빈 월드 10초 후 MM mob 일괄 정리 (재입장 시 fresh spawn)
+    spawn-location:
+      x: 179
+      y: 4
+      z: 157
+    description: "위험한 전투 구역."
+    warning: ""
+    protection:
+      block-break: false
+      block-place: false
+      block-interact: false
+      land-override: false      # 절대 불가 — 어떤 상호작용도 안 됨
+
+  # 외부 맵 (Otonoma Castle on Snowy Spruce Forest) — region/ 폴더 직접 배치
+  dungeon2:
+    world-name: "world_dungeon2"
+    display-name: "던전 2"
+    monster-spawn: false       # MythicMobs spawner 만 사용, vanilla 자연 스폰 차단
+    pvp: false
+    flat: false
+    biome: ""
+    border-size: 800
+    border-center:
+      x: 26
+      z: -7
+    spawn-location:
+      x: 26
+      y: 121
+      z: -6
+    difficulty: NORMAL         # 외부 맵 level.dat 기본값 덮어쓰기 (몹 데미지 위해)
+    auto-cleanup-on-empty: true   # 빈 월드 10초 후 MM mob 일괄 정리
+    description: "오토노마 캐슬 (눈 덮인 가문비 숲)."
+    warning: ""
+    protection:
+      block-break: false
+      block-place: false
+      block-interact: false
+      land-override: false
+
+  # 외부 맵 (사막 버닝 던전) — 초급/중급 각자 별도 월드 인스턴스 (split 운영)
+  burning1:
+    world-name: "world_burning1"
+    display-name: "버닝 초급 던전"
+    monster-spawn: false
+    pvp: false
+    flat: false
+    biome: ""
+    border-size: 400
+    border-center:
+      x: 88
+      z: 89
+    spawn-location:
+      x: 175
+      y: 102
+      z: 178
+    difficulty: NORMAL
+    auto-cleanup-on-empty: true
+    description: "사막 버닝 초급 던전 (시간 제한 30분)."
+    warning: "30분 후 자동 마을 귀환"
+    protection:
+      block-break: false
+      block-place: false
+      block-interact: false
+      land-override: false
+
+  burning2:
+    world-name: "world_burning2"
+    display-name: "버닝 중급 던전"
+    monster-spawn: false
+    pvp: false
+    flat: false
+    biome: ""
+    border-size: 400
+    border-center:
+      x: 88
+      z: 89
+    spawn-location:
+      x: 175
+      y: 102
+      z: 178
+    difficulty: NORMAL
+    auto-cleanup-on-empty: true
+    description: "사막 버닝 중급 던전 (시간 제한 30분)."
+    warning: "30분 후 자동 마을 귀환"
+    protection:
+      block-break: false
+      block-place: false
+      block-interact: false
+      land-override: false
+
+  # 외부 맵 (pvp animation map) — region/ 폴더 직접 배치
+  # world_boss1 폴더를 복붙해서 world_boss1_1 / world_boss1_2 두 인스턴스 운영
+  boss1_1:
+    world-name: "world_boss1_1"
+    display-name: "보스 1-1"
+    monster-spawn: false
+    pvp: false
+    flat: false
+    biome: ""
+    border-size: 400
+    border-center:
+      x: 0
+      z: 0
+    spawn-location:
+      x: -27
+      y: 6
+      z: 6
+    difficulty: NORMAL         # 외부 맵이 PEACEFUL 로 저장돼 있어 보스 spawn 자체가 불가능. 강제 NORMAL
+    time-lock: night           # 13000 틱 고정 + 데이라이트 사이클 off (밤 분위기 유지)
+    blocked-commands: [탈것, mount]
+    description: "보스맵 1-1 — 협동 보스 레이드 (The Lich King)."
+    warning: ""
+    protection:
+      block-break: false
+      block-place: false
+      block-interact: false
+      land-override: false
+
+  boss1_2:
+    world-name: "world_boss1_2"
+    display-name: "보스 1-2"
+    monster-spawn: false
+    pvp: false
+    flat: false
+    biome: ""
+    border-size: 400
+    border-center:
+      x: 0
+      z: 0
+    spawn-location:
+      x: -27
+      y: 6
+      z: 6
+    difficulty: NORMAL
+    time-lock: night
+    blocked-commands: [탈것, mount]
+    description: "보스맵 1-2 — 협동 보스 레이드 (The Lich King)."
+    warning: ""
+    protection:
+      block-break: false
+      block-place: false
+      block-interact: false
+      land-override: false
