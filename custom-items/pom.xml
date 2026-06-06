@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.exit</groupId>
+    <artifactId>custom-items</artifactId>
+    <version>1.9.0</version>
+    <packaging>jar</packaging>
+
+    <properties>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <paper.version>1.21.4-R0.1-SNAPSHOT</paper.version>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>papermc</id>
+            <url>https://repo.papermc.io/repository/maven-public/</url>
+        </repository>
+        <repository>
+            <id>lumine</id>
+            <url>https://mvn.lumine.io/repository/maven-public/</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.papermc.paper</groupId>
+            <artifactId>paper-api</artifactId>
+            <version>${paper.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- Core 의존성: LampProvider 등록용 -->
+        <dependency>
+            <groupId>com.exit</groupId>
+            <artifactId>core</artifactId>
+            <version>1.8.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- Job 의존성: MiningExpHook / FishingExpHook (소프트, runtime 에 없으면 catch) -->
+        <dependency>
+            <groupId>com.exit</groupId>
+            <artifactId>job</artifactId>
+            <version>2.5.1</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- Fishing 의존성: FishItem.isPremium (소프트, runtime 에 없으면 catch) -->
+        <dependency>
+            <groupId>com.exit</groupId>
+            <artifactId>fishing</artifactId>
+            <version>1.5.2</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- Farming 의존성: Crop.matchingMature (소프트, isPluginEnabled 체크로 가드) -->
+        <dependency>
+            <groupId>com.exit</groupId>
+            <artifactId>farming</artifactId>
+            <version>1.11.3</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- MythicMobs 의존성: /dummy 가 bv_dummy 를 소환하는 데 사용 (소프트, runtime 가드) -->
+        <dependency>
+            <groupId>io.lumine</groupId>
+            <artifactId>Mythic-Dist</artifactId>
+            <version>5.11.2</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>CustomItems-${project.version}</finalName>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+            </plugin>
+        </plugins>
+    </build>
+</project>

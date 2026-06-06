@@ -1,0 +1,283 @@
+# ═══════════════════════════════════════════════════════════════════
+# Job 플러그인 설정 — 직업 시스템 (광부/어부/농부)
+# ═══════════════════════════════════════════════════════════════════
+#
+# 모든 플레이어는 첫 입장 시 3직업을 모두 Lv1, EXP 0 으로 시작.
+# 만렙 = 10. 능력은 레벨 2/4/6/8/10 에 해금.
+# 능력 효과는 코드 측에서 'id' 매핑으로 적용 — yml 의 name/description/level 은
+# 자유 수정 가능, id 만 그대로 두면 효과는 정상 동작.
+
+# ─── EXP 곡선 ──────────────────────────────────────────────────────
+# 다음 레벨까지 필요한 EXP = base * (level ^ exponent)
+# 만렙 누적 EXP ≈ 11,100 (base=100, exp=1.5, max-level=10)
+exp-curve:
+  base: 100
+  exponent: 1.5
+  max-level: 10
+
+# ─── 직업 정의 ─────────────────────────────────────────────────────
+jobs:
+  miner:
+    name: "광부"
+    description: "채광에 특화된 직업"
+    icon: DIAMOND_PICKAXE
+    perks:
+      - id: mineral_storage
+        level: 2
+        name: "광부의 보관함"
+        description: "광물 보관함을 받습니다 (광물 전용 보관, 도감 없음)"
+      - id: ore_drop_x2_chance
+        level: 4
+        name: "노다지"
+        description: "광석을 캘 때 10% 확률로 최종 드롭이 두 배 (주괴/행운/블록 결과 모두 포함)"
+      # Lv6 — 기존 튼튼한 몸 I 는 2026-05-16 부로 비활성 (보관함 페이지 확장 perk 로 대체).
+      # 추후 다른 레벨로 재배치 시 주석 해제. PerkRegistry 의 registerMaxHealth(MINER,..) 도 같이 주석.
+      # - id: max_health_2
+      #   level: 6
+      #   name: "튼튼한 몸 I"
+      #   description: "최대 체력 +1"
+      - id: mineral_storage_pages_6
+        level: 6
+        name: "넉넉한 광부 보관함"
+        description: "광부의 보관함이 +3 페이지 (총 4페이지, 172칸). 페이지는 보관함 GUI 양끝 화살표로 이동"
+      - id: ore_to_block_chance
+        level: 8
+        name: "광맥 행운"
+        description: "광석을 캘 때 2% 확률로 대응 블록 한 개로 드롭 (네더라이트 제외)"
+      - id: lava_immunity
+        level: 10
+        name: "용암 면역"
+        description: "용암/화염 피해를 받지 않음"
+
+  fisher:
+    name: "어부"
+    description: "낚시에 특화된 직업"
+    icon: FISHING_ROD
+    perks:
+      - id: fish_storage
+        level: 2
+        name: "어부의 보관함"
+        description: "물고기 보관함을 받습니다 (현재 계절/도감 확인. 판매 불가)"
+      # Lv4 — 기존 큰 손 I 는 2026-05-14 부로 비활성 (보관함 페이지 확장 perk 로 대체).
+      # 추후 다른 레벨로 재배치 시 주석 해제. FishingListener.onFish 의 분기도 함께 주석.
+      # - id: fish_min_length_10
+      #   level: 4
+      #   name: "큰 손 I"
+      #   description: "잡은 물고기 최소 체장 +10cm"
+      - id: fish_storage_pages_4
+        level: 4
+        name: "넉넉한 보관함"
+        description: "어부의 보관함이 +3 페이지 (총 4페이지, 172칸). 페이지는 보관함 GUI 양끝 화살표로 이동"
+      # Lv6 — 기존 튼튼한 몸 I 도 비활성. PerkRegistry 의 registerMaxHealth(FISHER,..) 도 같이 주석.
+      # - id: max_health_2
+      #   level: 6
+      #   name: "튼튼한 몸 I"
+      #   description: "최대 체력 +1"
+      - id: fish_storage_pages_6
+        level: 6
+        name: "더 넉넉한 보관함"
+        description: "어부의 보관함이 추가 +3 페이지 (총 7페이지, 301칸)"
+      - id: bite_time_minus_3s
+        level: 8
+        name: "민첩한 낚시"
+        description: "물고기가 무는 시간 -3초 (낚시대 미끼 효과에 추가 적용)"
+      - id: water_breathing
+        level: 10
+        name: "수중 호흡"
+        description: "물 속에서 익사하지 않음"
+
+  farmer:
+    name: "농부"
+    description: "농사에 특화된 직업"
+    icon: WHEAT
+    perks:
+      - id: crop_storage
+        level: 2
+        name: "농부의 보관함"
+        description: "작물 보관함을 받습니다 (작물 전용 보관, 도감 없음)"
+      - id: watering_can_master
+        level: 4
+        name: "농사의 달인"
+        description: "철 / 다이아 등급 물뿌리개를 모두 사용할 수 있음"
+      - id: hoe_harvest_1x2
+        level: 6
+        name: "광역 수집"
+        description: "농부의 보관함 자동 수집 범위 10x10 (작물/씨앗)"
+      - id: crop_storage_pages_8
+        level: 8
+        name: "넉넉한 농부 보관함"
+        description: "농부의 보관함이 +3 페이지 (총 4페이지, 172칸). 페이지는 보관함 GUI 양끝 화살표로 이동"
+      - id: auto_replant
+        level: 10
+        name: "인간 파종기"
+        description: "괭이로 작물을 수확하면 같은 자리에 동일 씨앗을 자동으로 다시 심음 (보관함→인벤토리 순으로 씨앗 차감, 없으면 작동 안 함)"
+
+# ─── 광부 EXP 룰 ───────────────────────────────────────────────────
+# allowed-worlds: 광석을 캐도 EXP 가 오르는 월드. 그 외 월드는 0.
+# ores: 광석별 부여 EXP. 키는 Material 이름(대문자). 0/누락은 EXP 없음.
+# 섬세한 손길(Silk Touch) 인챈트로 캔 경우는 코드에서 항상 EXP 0 처리.
+# 손으로 캔 경우(인챈트 없는 도구 포함)도 EXP 부여.
+#
+# 만렙(Lv10) 누적 ≈ 11,100 EXP. 1초/블록 + 약간의 탐사 가정 시
+# 철 광석 (1 EXP) 만 채광해서 만렙까지 약 2시간 30분.
+mining:
+  allowed-worlds:
+    - "world_wild"
+    - "world_nether"
+    - "world_the_end"
+  # 전체 광부 EXP 배율. 1.0 = 기존 ores 값 그대로. 곱셈 적용.
+  # JobListener.onMine + MiningExpHookImpl.grantOreBreak 두 경로 모두 적용됨.
+  # 2026-05-17: 1.3 → 2.6 (사용자 요청, 이전 대비 2배 부여)
+  exp-multiplier: 2.6
+  ores:
+    COAL_ORE: 1
+    DEEPSLATE_COAL_ORE: 1
+    IRON_ORE: 1
+    DEEPSLATE_IRON_ORE: 1
+    COPPER_ORE: 1
+    DEEPSLATE_COPPER_ORE: 1
+    GOLD_ORE: 2
+    DEEPSLATE_GOLD_ORE: 2
+    NETHER_GOLD_ORE: 2
+    REDSTONE_ORE: 2
+    DEEPSLATE_REDSTONE_ORE: 2
+    LAPIS_ORE: 2
+    DEEPSLATE_LAPIS_ORE: 2
+    DIAMOND_ORE: 5
+    DEEPSLATE_DIAMOND_ORE: 5
+    EMERALD_ORE: 5
+    DEEPSLATE_EMERALD_ORE: 5
+    NETHER_QUARTZ_ORE: 1
+    ANCIENT_DEBRIS: 10
+
+  # 능력 'ore_to_block_chance' (Lv8) 발동 시 광석 → 대응 블록 드롭.
+  # ANCIENT_DEBRIS 는 의도적으로 매핑에서 제외 (= 발동 안 함).
+  ore-to-block:
+    COAL_ORE: COAL_BLOCK
+    DEEPSLATE_COAL_ORE: COAL_BLOCK
+    IRON_ORE: IRON_BLOCK
+    DEEPSLATE_IRON_ORE: IRON_BLOCK
+    COPPER_ORE: COPPER_BLOCK
+    DEEPSLATE_COPPER_ORE: COPPER_BLOCK
+    GOLD_ORE: GOLD_BLOCK
+    DEEPSLATE_GOLD_ORE: GOLD_BLOCK
+    NETHER_GOLD_ORE: GOLD_BLOCK
+    REDSTONE_ORE: REDSTONE_BLOCK
+    DEEPSLATE_REDSTONE_ORE: REDSTONE_BLOCK
+    LAPIS_ORE: LAPIS_BLOCK
+    DEEPSLATE_LAPIS_ORE: LAPIS_BLOCK
+    DIAMOND_ORE: DIAMOND_BLOCK
+    DEEPSLATE_DIAMOND_ORE: DIAMOND_BLOCK
+    EMERALD_ORE: EMERALD_BLOCK
+    DEEPSLATE_EMERALD_ORE: EMERALD_BLOCK
+    NETHER_QUARTZ_ORE: QUARTZ_BLOCK
+
+  ore-to-block-chance: 0.02  # 2%
+  ore-drop-x2-chance: 0.10   # 10%
+
+# ─── 농부 EXP 룰 ───────────────────────────────────────────────────
+# 작물 한 칸 수확당 EXP. 손으로 캐든 괭이로 캐든 부여.
+# 만렙(Lv10) 까지 약 64 경작지 6시간 기준으로 빡빡하게 — 작물당 ≈ 8 EXP.
+farming:
+  crops:
+    WHEAT: 8
+    CARROTS: 8
+    POTATOES: 8
+    BEETROOTS: 10
+    NETHER_WART: 8
+    PUMPKIN: 6
+    MELON: 6
+    SUGAR_CANE: 4
+    BAMBOO: 2
+    COCOA: 6
+
+# ─── 어부 EXP 룰 ───────────────────────────────────────────────────
+# 물고기 1마리 잡을 때마다 부여. premium 등급은 multiplier 배수.
+# 풀자동 8시간 ≈ 1100 마리 가정 시 일반 10 EXP / 최고급 20 EXP 로 만렙.
+fishing:
+  exp-per-catch: 10
+  premium-multiplier: 2.0
+
+# ─── 광부의 보관함 화이트리스트 ─────────────────────────────────────
+# 광부 Lv2 perk 'mineral_storage' 가 부여하는 보관함에 넣을 수 있는 Material.
+# 원광 + 주괴/보석 + 광석 블록 + 네더라이트 전부.
+mineral-storage:
+  whitelist:
+    # 원광 (raw)
+    - RAW_IRON
+    - RAW_COPPER
+    - RAW_GOLD
+    # 주괴/보석/원자재
+    - COAL
+    - CHARCOAL
+    - IRON_INGOT
+    - COPPER_INGOT
+    - GOLD_INGOT
+    - DIAMOND
+    - EMERALD
+    - REDSTONE
+    - LAPIS_LAZULI
+    - QUARTZ
+    - NETHERITE_SCRAP
+    - NETHERITE_INGOT
+    - AMETHYST_SHARD
+    # 압축 블록
+    - RAW_IRON_BLOCK
+    - RAW_COPPER_BLOCK
+    - RAW_GOLD_BLOCK
+    - COAL_BLOCK
+    - IRON_BLOCK
+    - COPPER_BLOCK
+    - GOLD_BLOCK
+    - DIAMOND_BLOCK
+    - EMERALD_BLOCK
+    - REDSTONE_BLOCK
+    - LAPIS_BLOCK
+    - QUARTZ_BLOCK
+    - NETHERITE_BLOCK
+    - AMETHYST_BLOCK
+    # 광석 자체 (silk-touch 로 캔 경우)
+    - COAL_ORE
+    - DEEPSLATE_COAL_ORE
+    - IRON_ORE
+    - DEEPSLATE_IRON_ORE
+    - COPPER_ORE
+    - DEEPSLATE_COPPER_ORE
+    - GOLD_ORE
+    - DEEPSLATE_GOLD_ORE
+    - NETHER_GOLD_ORE
+    - REDSTONE_ORE
+    - DEEPSLATE_REDSTONE_ORE
+    - LAPIS_ORE
+    - DEEPSLATE_LAPIS_ORE
+    - DIAMOND_ORE
+    - DEEPSLATE_DIAMOND_ORE
+    - EMERALD_ORE
+    - DEEPSLATE_EMERALD_ORE
+    - NETHER_QUARTZ_ORE
+    - ANCIENT_DEBRIS
+    # 오버월드 돌 종류 (채광 부산물 자동수집 — 2026-05-16 확장)
+    - STONE
+    - COBBLESTONE
+    - MOSSY_COBBLESTONE
+    - DEEPSLATE
+    - COBBLED_DEEPSLATE
+    - GRANITE
+    - POLISHED_GRANITE
+    - DIORITE
+    - POLISHED_DIORITE
+    - ANDESITE
+    - POLISHED_ANDESITE
+    - TUFF
+    - POLISHED_TUFF
+    - TUFF_BRICKS
+    - CALCITE
+    - DRIPSTONE_BLOCK
+    # 네더 돌 종류
+    - NETHERRACK
+    - BASALT
+    - SMOOTH_BASALT
+    - BLACKSTONE
+    - POLISHED_BLACKSTONE
+    # 엔드 돌
+    - END_STONE

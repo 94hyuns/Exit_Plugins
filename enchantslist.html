@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>CustomItems 인챈트 목록</title>
+<style>* { box-sizing: border-box; }
+body {
+    font-family: 'Noto Sans KR', 'Malgun Gothic', system-ui, sans-serif;
+    background: #1a1d23; color: #e8e8ec;
+    margin: 0; padding: 24px 32px;
+    line-height: 1.5;
+}
+header { margin-bottom: 32px; border-bottom: 1px solid #393d46; padding-bottom: 12px; }
+header h1 { margin: 0; font-size: 24px; color: #ffd180; }
+header small { color: #8b8f99; font-size: 12px; }
+section { margin-bottom: 36px; }
+h2 { font-size: 20px; margin: 24px 0 12px; padding-left: 12px; border-left: 4px solid; }
+h2.life   { border-color: #8aff8a; color: #8aff8a; }
+h2.combat { border-color: #ff7a7a; color: #ff7a7a; }
+h3 { font-size: 16px; margin: 18px 0 8px; color: #b8c0cc; }
+h3 .hint { font-size: 12px; color: #8b8f99; font-weight: 400; margin-left: 6px; }
+table {
+    width: 100%; border-collapse: collapse;
+    background: #22262e; border-radius: 6px; overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,.3);
+}
+th {
+    background: #2d323c; color: #ffd180;
+    padding: 10px 14px; text-align: left; font-weight: 600;
+    font-size: 13px; letter-spacing: .04em;
+}
+td {
+    padding: 9px 14px; border-top: 1px solid #2d323c;
+    font-size: 14px; vertical-align: top;
+}
+td.name { font-weight: 600; color: #f5f5f5; white-space: nowrap; }
+td.lv   { font-family: 'Consolas', monospace; color: #ffaa00; white-space: nowrap; }
+td.tool { color: #8ec5ff; white-space: nowrap; }
+.life-tbl  td.name { color: #c4ffc4; }
+.combat-tbl td.name { color: #ffd5d5; }
+tr:hover td { background: rgba(255,255,255,.03); }
+</style>
+</head>
+<body>
+<header><h1>CustomItems 인챈트 목록</h1><small>자동 생성 — 2026-05-23 02:27 · 총 38종</small></header>
+<section><h2 class="life">생활 인챈트</h2>
+<table class="life-tbl">
+<thead><tr><th>이름</th><th>레벨</th><th>도구</th><th>상세 설명</th></tr></thead>
+<tbody>
+<tr><td class="name">농작물 뼛가루</td><td class="lv">-</td><td class="tool">공통 (곡괭이·괭이·삽·낚싯대·도끼)</td><td>수확/채광 시 (10~50)% 확률로 뼛가루 (1~2)개 드랍</td></tr>
+<tr><td class="name">경험치 획득량</td><td class="lv">-</td><td class="tool">공통 (곡괭이·괭이·삽·낚싯대·도끼)</td><td>생활 활동(수확/채광/낚시/삽질/벌목) 시 (20~50)% 확률로 경험치 구슬 (2~3)개 드랍</td></tr>
+<tr><td class="name">사냥꾼</td><td class="lv">-</td><td class="tool">공통 (곡괭이·괭이·삽·낚싯대·도끼)</td><td>동물 처치 시 (20~50)% 확률로 부산물 (양털/고기/가죽 등) (1~2)배 추가</td></tr>
+<tr><td class="name">급속제련</td><td class="lv">Lv 1~2</td><td class="tool">곡괭이</td><td>광물 채굴 시 제련된 주괴 드랍 (Lv2: 주괴 +1개, 다이아/에메랄드/청금석/레드스톤/석탄/네더라이트는 광석 +1) (섬세한 손길이 있을 경우 적용 안됨)</td></tr>
+<tr><td class="name">채굴의 달인</td><td class="lv">Lv 1~2</td><td class="tool">곡괭이</td><td>채굴 시 인접 블록 동시 채굴 (Lv1: 상하 / Lv2: 십자) · 야생 한정</td></tr>
+<tr><td class="name">인간 굴착기</td><td class="lv">Lv 1~3</td><td class="tool">곡괭이</td><td>(50/60/75)% 확률로 3×3×3 폭발 채굴 · 야생 한정</td></tr>
+<tr><td class="name">행운의 작물</td><td class="lv">Lv 1~5</td><td class="tool">괭이</td><td>농작물 수확 시 (30/35/40/45/50)% 확률로 작물 +2 추가</td></tr>
+<tr><td class="name">괭이의 달인</td><td class="lv">Lv 1~2</td><td class="tool">괭이</td><td>시선 방향 앞쪽 (1/2)칸의 자란 작물 동시 수확 (행운의 작물 효과도 함께 적용)</td></tr>
+<tr><td class="name">모래 유리화</td><td class="lv">-</td><td class="tool">삽</td><td>모래 채굴 시 유리블록 드랍</td></tr>
+<tr><td class="name">자동 회수</td><td class="lv">Lv 1~3</td><td class="tool">낚싯대</td><td>입질 후 (5/3/1)초 뒤 자동 회수 · 잡히는 물고기 사이즈 티어 +Lv (자동 투척과 합산, 최대 4)</td></tr>
+<tr><td class="name">자동 투척</td><td class="lv">Lv 1~3</td><td class="tool">낚싯대</td><td>잡은 후 (3/2/1)초 뒤 자동 투척 · 잡히는 물고기 사이즈 티어 +Lv (자동 회수와 합산, 최대 4)</td></tr>
+<tr><td class="name">숙련된 벌목</td><td class="lv">Lv 1~3</td><td class="tool">도끼</td><td>나무 벌목 시 (20/35/50)% 확률로 나무 추가 +1</td></tr>
+<tr><td class="name">벌목의 왕</td><td class="lv">Lv 1~2</td><td class="tool">도끼</td><td>연결된 나무 블럭이 (5/10)개 이하이면 한번에 전체 벌목</td></tr>
+</tbody></table>
+</section>
+<section><h2 class="combat">전투 인챈트</h2>
+<h3>무기 기본</h3>
+<table class="combat-tbl">
+<thead><tr><th>이름</th><th>레벨</th><th>도구</th><th>상세 설명</th></tr></thead>
+<tbody>
+<tr><td class="name">공격력</td><td class="lv"></td><td class="tool">검·창·삼지창·철퇴</td><td>공격력 증가 (+3 / +4 / +5)</td></tr>
+<tr><td class="name">흡혈</td><td class="lv"></td><td class="tool">검·창·삼지창·철퇴</td><td>공격 시 체력 +(0.5~1.0)칸 회복 · 쿨타임 (2~3)초</td></tr>
+<tr><td class="name">활 공격력</td><td class="lv"></td><td class="tool">활</td><td>화살에 +(1.5~3.0) 데미지 부여</td></tr>
+<tr><td class="name">활 치명타</td><td class="lv"></td><td class="tool">활</td><td>화살 (30~50)% 확률로 ×2 데미지</td></tr>
+</tbody></table>
+<h3>무기 유니크</h3>
+<table class="combat-tbl">
+<thead><tr><th>이름</th><th>레벨</th><th>도구</th><th>상세 설명</th></tr></thead>
+<tbody>
+<tr><td class="name">거인의 힘</td><td class="lv">Lv 1~2</td><td class="tool">검·창·삼지창·철퇴</td><td>공격 시 최대체력 비례 +(300~420)% 데미지 (28칸 기준)</td></tr>
+<tr><td class="name">충만한 활력</td><td class="lv">Lv 1~2</td><td class="tool">검·창·삼지창·철퇴</td><td>허기 7칸 이상에서 배부를수록 추가 데미지 (만복 시 +300~420%)</td></tr>
+<tr><td class="name">끝없는 허기</td><td class="lv">Lv 1~2</td><td class="tool">검·창·삼지창·철퇴</td><td>허기 5칸 이하에서 배고플수록 추가 데미지 (1칸 시 +390~560%)</td></tr>
+<tr><td class="name">약자멸시</td><td class="lv">Lv 1~2</td><td class="tool">검·창·삼지창·철퇴</td><td>적 체력 50% 미만 시 +(300~420)% 데미지</td></tr>
+<tr><td class="name">묵직한 일격</td><td class="lv">Lv 1~2</td><td class="tool">검·창·삼지창·철퇴·활</td><td>공격력 +(10/15) flat</td></tr>
+<tr><td class="name">정면승부</td><td class="lv">Lv 1~2</td><td class="tool">검·창·삼지창·철퇴·활</td><td>적 체력 50% 이상 시 +(300~420)% 데미지</td></tr>
+<tr><td class="name">치명타</td><td class="lv">Lv 1~2</td><td class="tool">검·창·삼지창·철퇴·활</td><td>(25/40)% 확률로 데미지 (5/6)배 (합연산). 무기 우클릭 스킬에도 적용</td></tr>
+<tr><td class="name">질주의 일격</td><td class="lv">Lv 1~2</td><td class="tool">창</td><td>스프린트 시 이동속도 비례 추가 데미지 (풀스프린트 +300~420%)</td></tr>
+<tr><td class="name">낙뢰</td><td class="lv">Lv 1~2</td><td class="tool">철퇴</td><td>근접 공격 시 (40~50)% 확률로 850%의 번개 데미지 (합연산)</td></tr>
+<tr><td class="name">이연사</td><td class="lv">Lv 1~2</td><td class="tool">활</td><td>확률(50 / 75)%로 화살 1발 추가 발사 — 무한 인챈트 보유 시 최소 화살 갯수 2개 필요</td></tr>
+<tr><td class="name">삼연사</td><td class="lv">Lv 1~2</td><td class="tool">활</td><td>확률(35 / 55)%로 화살 2발 추가 발사 — 무한 인챈트 보유 시 최소 화살 갯수 3개 필요, 이연사와 중복 가능</td></tr>
+<tr><td class="name">신속 사격</td><td class="lv">Lv 1~2</td><td class="tool">활</td><td>(80 / 90)% 차지 시간 감소</td></tr>
+</tbody></table>
+<h3>방어구 기본</h3>
+<table class="combat-tbl">
+<thead><tr><th>이름</th><th>레벨</th><th>도구</th><th>상세 설명</th></tr></thead>
+<tbody>
+<tr><td class="name">견고함</td><td class="lv"></td><td class="tool">방어구</td><td>방어도 +(2~4)</td></tr>
+<tr><td class="name">활력</td><td class="lv"></td><td class="tool">방어구</td><td>최대체력 +(1.0~2.0)칸</td></tr>
+<tr><td class="name">황금 심장</td><td class="lv"></td><td class="tool">방어구</td><td>Lv 1~3 · (20/10/5)초마다 황금심장 +1칸 (최대 황금심장 갯수 = 부위수+1)</td></tr>
+<tr><td class="name">신속</td><td class="lv"></td><td class="tool">방어구</td><td>이동속도 +(5~10)%</td></tr>
+</tbody></table>
+<h3>방어구 세트 <span class="hint">(부위마다 레벨 1씩 합산 · 최대 4부위)</span></h3>
+<table class="combat-tbl">
+<thead><tr><th>이름</th><th>레벨</th><th>도구</th><th>상세 설명</th></tr></thead>
+<tbody>
+<tr><td class="name">공복의 저주</td><td class="lv"></td><td class="tool">방어구</td><td>허기 (4/3/2/1)칸 이상으로 회복되지 않음 · 3부위 이상부터 이동속도 +30% 보상 (스프린트 대체)</td></tr>
+<tr><td class="name">체력은 국력</td><td class="lv"></td><td class="tool">방어구</td><td>최대체력 +(4/6/8/10)칸</td></tr>
+<tr><td class="name">아그니</td><td class="lv"></td><td class="tool">방어구</td><td>착용자가 발생시킨 적의 불 데미지 +(50/100/150/200)% (화염, 발화 인챈트)</td></tr>
+<tr><td class="name">도깨비불</td><td class="lv"></td><td class="tool">방어구</td><td>방어구 주위에 파란 영혼불 공전 + 공격 시 부위수 × 1.5 깡뎀 추가 (근접 · 활)</td></tr>
+<tr><td class="name">행운</td><td class="lv"></td><td class="tool">방어구</td><td>부착된 부위의 기본 인챈트 효과 2배 + 다른 세트 인챈트의 부위 카운트에 자동 포함</td></tr>
+</tbody></table>
+</section>
+</body>
+</html>

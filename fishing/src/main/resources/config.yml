@@ -1,0 +1,47 @@
+# ===== 낚시 플러그인 설정 =====
+# /낚시리로드 명령어로 실시간 반영 (계절 순환 주기도 재적용됨)
+
+# 계절 순환 주기 (분 단위). 10 = 10분, 60 = 1시간
+season:
+  cycle-minutes: 10
+  # 브로드캐스트 메시지 표시
+  broadcast-on-change: true
+
+# 판매가 계산 공식:
+#   per_fish = (cm * cm-weight + g * gram-weight) × 계절 배수 × 최고급 배수
+#
+# 참고 — 어종 크기 구간 (rollSize):
+#   소형 (1~5/10): cm 30~100, g 100~300
+#   중형 (6~7/10): cm 101~250, g 301~800
+#   대형 (8~9/10): cm 251~350, g 801~1700
+#   초대형 (10/10): cm 351~500, g 1701~3000
+#
+# 권장 기본값으로 다른 컨텐츠와 균형:
+#   소형 제철 ≈ 50~100w, 중형 ≈ 200~400w, 대형 ≈ 500~900w, 초대형 ≈ 1000~1500w
+price:
+  cm-weight: 0.3              # cm 1당 가중치
+  gram-weight: 0.15           # g 1당 가중치
+  in-season-multiplier: 1.5   # 제철 어종 배수
+  off-season-multiplier: 0.5  # 반대 계절 배수
+  # 최고급 (premium) 보너스 배수
+  premium-multiplier: 2.0
+
+# 최고급 물고기 확률 (1/N)
+premium:
+  chance-one-in: 1000
+
+# 메시지 프리픽스
+prefix: "&6[ &fserver &6]"
+
+# Job 플러그인 연동. Job 미설치 시 모든 항목 무시.
+# - per-catch: 한 마리 잡을 때 어부 EXP. premium 은 multiplier 배.
+#   8h 풀자동 ≈ 1100마리 / 만렙 누적 11100 EXP 기준 10 적정.
+# - min-length-base: rollSize 의 최소 cm. 능력 fish_min_length_10 (Lv4) 시
+#   여기에 +10 클램프.
+# - bite-time-reduction-ticks: 능력 bite_time_minus_3s (Lv8) 시 hook 의
+#   wait time 을 이만큼 차감. 60 = 3초 (vanilla 1tick = 1/20초).
+job-exp:
+  per-catch: 10
+  premium-multiplier: 2.0
+  min-length-base: 30
+  bite-time-reduction-ticks: 60

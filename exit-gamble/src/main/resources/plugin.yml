@@ -1,0 +1,84 @@
+name: ExitGamble
+version: 1.5.1
+main: com.exit.gamble.ExitGamblePlugin
+api-version: "1.21"
+depend: [Core]
+softdepend: [Economy]
+description: 도박형 미니게임 모음 (슬롯머신 + 정각 복권, 향후 블랙잭/룰렛 등)
+
+commands:
+  # ─── 슬롯머신 ───
+  슬롯머신:
+    description: 슬롯머신 GUI 오픈 (가까운 머신 자동 선택)
+    usage: /슬롯머신 [id]
+    permission: gamble.use
+  슬롯리로드:
+    description: ExitGamble config 리로드
+    usage: /슬롯리로드
+    permission: gamble.admin
+  슬롯테스트:
+    description: 결제 없이 1회 스핀 (관리자 테스트)
+    usage: /슬롯테스트 [id]
+    permission: gamble.admin
+  슬롯머신스폰:
+    description: 시선 위치에 슬롯머신 등록 (디스플레이)
+    usage: /슬롯머신스폰 <id>
+    permission: gamble.admin
+  슬롯머신제거:
+    description: 슬롯머신 제거 (NPC 도 같이)
+    usage: /슬롯머신제거 <id>
+    permission: gamble.admin
+  슬롯머신목록:
+    description: 등록된 머신 목록
+    usage: /슬롯머신목록
+    permission: gamble.admin
+  슬롯머신NPC스폰:
+    description: 머신에 NPC 부착 (Core NpcService)
+    usage: /슬롯머신NPC스폰 <머신id> [스킨플레이어이름]
+    permission: gamble.admin
+  슬롯머신NPC제거:
+    description: 머신 NPC 만 제거 (머신은 유지)
+    usage: /슬롯머신NPC제거 <머신id>
+    permission: gamble.admin
+
+  # ─── 복권 ───
+  복권:
+    description: 복권 판매소 GUI 오픈
+    usage: /복권
+    permission: gamble.use
+  복권구매:
+    description: 복권 티켓 구매 (랜덤 번호 부여)
+    usage: /복권구매 [수량]
+    permission: gamble.use
+  복권내역:
+    description: 내 보유 티켓 번호 목록
+    usage: /복권내역
+    permission: gamble.use
+  복권상태:
+    description: 현재 풀, 다음 추첨까지 시간, 총 티켓 수
+    usage: /복권상태
+    permission: gamble.use
+  복권결과:
+    description: 최근 추첨 결과
+    usage: /복권결과 [건수]
+    permission: gamble.use
+  복권추첨:
+    description: 강제 추첨 실행 (관리자 테스트)
+    usage: /복권추첨
+    permission: gamble.admin
+  복권NPC스폰:
+    description: 복권 판매원 NPC 스폰
+    usage: /복권NPC스폰 <id> [스킨플레이어이름]
+    permission: gamble.admin
+  복권NPC제거:
+    description: 복권 NPC 제거
+    usage: /복권NPC제거 <id>
+    permission: gamble.admin
+
+permissions:
+  gamble.use:
+    description: 도박 미니게임 사용 권한
+    default: true
+  gamble.admin:
+    description: 관리자 권한
+    default: op

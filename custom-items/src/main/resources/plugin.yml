@@ -1,0 +1,79 @@
+name: CustomItems
+version: ${project.version}
+main: com.exit.customitems.CustomItemsPlugin
+api-version: '1.21'
+author: exit
+description: 램프 기반 커스텀 인챈트 시스템
+depend: [Core]
+softdepend: [Job, Fishing, Farming, MythicMobs, ModelEngine]
+
+commands:
+  lamp:
+    description: 램프 관리 명령어
+    usage: /lamp give <player> <life|combat> [amount]
+    permission: customitems.lamp.admin
+  dummy:
+    description: 허수아비 관리 명령어
+    usage: /dummy <spawn|clear>
+    permission: customitems.dummy.admin
+  skilllist:
+    description: SET 인챈트 목록
+    aliases: [스킬목록]
+  skillinfo:
+    description: SET 인챈트 상세 정보
+    usage: /skillinfo <스킬명>
+    aliases: [스킬정보]
+  lampbulk:
+    description: 램프 작업대 (대량 작업) 명령어
+    usage: /lampbulk <open|spawn|remove>
+    aliases: [램프작업대]
+  equiptest:
+    description: OP 테스트 — 인챈트 박힌 장비 즉시 지급
+    usage: /equiptest <방어구|검|창|삼지창|철퇴|활> <인챈트명[레벨]> <플레이어>
+    aliases: [장비테스트]
+  frostmourne:
+    description: 프로스트모운 검 지급 (테스트용)
+    usage: /frostmourne give <player> [amount]
+    permission: customitems.frostmourne.admin
+    aliases: [프로스트모운]
+  greatsword:
+    description: GreatSword 지급
+    usage: /greatsword give <player> [amount]
+    permission: customitems.greatsword.admin
+    aliases: [그레이트소드]
+  wingedarmor:
+    description: 용의 날개 갑옷 지급
+    usage: /wingedarmor give <player> [amount]
+    permission: customitems.wingedarmor.admin
+    aliases: [용의날개]
+  anubisarmor:
+    description: 아누비스 방어구 세트 지급 (보스2 드롭)
+    usage: /anubisarmor give <player> <helmet|leggings|boots|set> [speed|saturation|haste|random] [amount]
+    permission: customitems.anubisarmor.admin
+    aliases: [아누비스방어구, 아누비스]
+
+permissions:
+  customitems.lamp.admin:
+    description: 램프 지급/관리 권한
+    default: op
+  customitems.dummy.admin:
+    description: 허수아비 생성/제거 권한
+    default: op
+  customitems.lampbulk.admin:
+    description: 램프 작업대 NPC spawn/remove 권한
+    default: op
+  customitems.testgear.admin:
+    description: OP 테스트 장비 지급 (/장비테스트)
+    default: op
+  customitems.frostmourne.admin:
+    description: 프로스트모운 지급 권한
+    default: op
+  customitems.greatsword.admin:
+    description: GreatSword 지급 권한
+    default: op
+  customitems.wingedarmor.admin:
+    description: 용의 날개 갑옷 지급 권한
+    default: op
+  customitems.anubisarmor.admin:
+    description: 아누비스 방어구 세트 지급 권한
+    default: op

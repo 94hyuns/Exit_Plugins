@@ -1,0 +1,78 @@
+# ===== 농사 플러그인 설정 =====
+
+drop:
+  # 행운 인챈트 당 추가 드랍 수 (base + lvl)
+  fruit-base: 3          # 열매 기본 드랍 (행운 0에서 1~3개)
+  seeds-base: 5          # 씨앗 기본 드랍. 행운3 평균 0.75개
+
+# 최고급 작물 확률 (1/N)
+premium:
+  chance-one-in: 1000
+
+# 바닐라 작물(밀/당근/감자/비트) 봉인 범위 (서버 전역)
+# true  = 서버 전역에서 바닐라 작물 심기/자동 성장 차단
+# false = 차단 해제 (커스텀 작물과 공존)
+vanilla-suppress: true
+
+# ─── 월드별 농사 정책 ───
+# FREE       : 바닐라처럼 자유. 괭이질/트램플/경작지 파괴 모두 허용
+# MANAGED    : 클레임된 경작지 위에서만 농사 가능. 괭이질 차단.
+#              경작지 티켓(작물 상인 판매)으로 흙을 경작지로 전환하면서 소유권 등록.
+#              클레임된 경작지는 트램플/파괴 불가 (관리자 크리 모드 예외).
+# FORBIDDEN  : 농사 완전 금지 (씨앗 심기/괭이질 모두 차단).
+worlds:
+  world_village:
+    policy: MANAGED
+  world_wild:
+    policy: FORBIDDEN
+  world_dungeon:
+    policy: FORBIDDEN
+
+  # worlds 섹션에 명시되지 않은 월드의 기본값 (예: world_nether, world_the_end)
+  default-policy: FREE
+
+# ─── 물 도구 (물뿌리개 + 스프링쿨러) ───
+# 바닐라 자동 적시기(물 인접 + 비)는 전 월드 차단됨. (수분 감소=마름은 정상 작동)
+# 경작지를 적실 수 있는 수단은 물뿌리개 우클릭 / 배치된 스프링쿨러 뿐.
+sprinkler:
+  # 스프링쿨러가 주위 경작지를 적시는 주기 (초)
+  tick-period-seconds: 5
+
+# 클레임된 경작지 자동 dry 주기 (초)
+# vanilla 는 물 인접 farmland 를 dry 처리 안 함 → 우리가 직접 처리.
+# 작물 자라는 중인 farmland 는 wet 유지 (dry 안 함).
+# 30 = 30초마다 moisture 1 감소. moisture 7 → 0 까지 약 3분 30초.
+farmland-dry:
+  tick-period-seconds: 30
+
+# Job 플러그인 연동 — 작물 1칸 수확당 농부 EXP. Job 미설치 시 무시.
+# 64 경작지 × 6시간 ≈ 1400 수확 / 11100 누적 EXP 기준 8 정도가 적정.
+job-exp-per-harvest: 8
+
+# ─── 농부의 보관함 화이트리스트 ─────────────────────────────────────
+# 농부 Lv2 perk 'crop_storage' 가 부여하는 보관함에 넣을 수 있는 Material.
+# Farming 의 CropItem (PDC fruit/seed) 은 자동 허용. 아래 list 는 바닐라 작물 추가.
+crop-storage:
+  vanilla-whitelist:
+    - WHEAT
+    - WHEAT_SEEDS
+    - CARROT
+    - POTATO
+    - BEETROOT
+    - BEETROOT_SEEDS
+    - MELON
+    - MELON_SLICE
+    - MELON_SEEDS
+    - PUMPKIN
+    - PUMPKIN_SEEDS
+    - SUGAR_CANE
+    - SWEET_BERRIES
+    - GLOW_BERRIES
+    - COCOA_BEANS
+    - NETHER_WART
+    - BAMBOO
+    - CACTUS
+    - KELP
+    - DRIED_KELP
+    - APPLE
+    - POISONOUS_POTATO

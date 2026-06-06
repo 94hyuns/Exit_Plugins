@@ -1,0 +1,12 @@
+{
+  "model": {
+    "type": "range_dispatch",
+    "property": "custom_model_data",
+    "entries": [
+      { "threshold": 1001, "model": { "type": "model", "model": "item/lamp_life" } },
+      { "threshold": 1002, "model": { "type": "model", "model": "item/lamp_battle" } },
+      { "threshold": 1003, "model": { "type": "model", "model": "item/lamp_mutation" } }
+    ],
+    "fallback": { "type": "model", "model": "item/book" }
+  }
+}

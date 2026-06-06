@@ -1,0 +1,55 @@
+slot:
+  # 베팅 단계 (소/중/대)
+  bets: [100, 1000, 10000]
+
+  # 심볼 단일 등장 확률(percent, 합=100)과 3개 일치 시 배당 배수(payout3)
+  # ※ percent 대신 weight 도 사용 가능 (legacy). 둘 다 있으면 percent 우선.
+  # 설정: RTP ≈ 88.7%, 당첨률(3매치) ≈ 14.3%, 잭팟 SEVEN ≈ 1/37,037
+  symbols:
+    CHERRY:  { percent: 50, material: SWEET_BERRIES,  payout3: 5 }
+    LEMON:   { percent: 25, material: GLOW_BERRIES,   payout3: 10 }
+    BELL:    { percent: 12, material: BELL,           payout3: 30 }
+    STAR:    { percent: 6,  material: NETHER_STAR,    payout3: 100 }
+    DIAMOND: { percent: 4,  material: DIAMOND,        payout3: 300 }
+    SEVEN:   { percent: 3,  material: GOLD_INGOT,     payout3: 500 }
+
+  jackpot-symbol: SEVEN
+
+  # near-miss bias: 세 심볼이 모두 다른 (ABC) 결과 중 일부를 사후에
+  # reel2 ← reel1 로 덮어써서 "두 개 맞췄는데 셋째 빗나감" 가시성을 ↑.
+  # 3매치/2-3매치/1-3매치 결과는 건들지 않음 → RTP·잭팟 확률 무영향.
+  near-miss-probability: 0.5
+
+  # 2매칭 완성 보너스: 자연 2매칭(AAB/ABA/BAA) 결과 중 c 확률로 셋째 reel 까지
+  # 동일 심볼로 덮어써서 3매칭 승격. "거의 다 맞췄는데 가끔 진짜 터지네" 체감.
+  # ⚠ RTP 영향 크다 (c × 2매칭_확률_합 ≈ c × 0.57 만큼 가산).
+  #    c=0.005 → RTP +4%p / c=0.010 → +8%p / c=0.015 → +12%p (100% 초과 가능)
+  two-match-completion-probability: 0.015
+
+  reel:
+    tick-interval: 2
+    reel1-stop-tick: 30
+    reel2-stop-tick: 45
+    reel3-stop-tick: 60
+
+# ─── 복권 ───
+lottery:
+  # 티켓 1장 가격
+  ticket-price: 500
+
+  # 번호 범위 (0 ~ number-range-1). 클수록 당첨 확률 ↓
+  number-range: 1000
+
+  # 매 회차 풀에 자동 적립되는 시드 머니 (판매액과 별개)
+  seed-per-draw: 60000
+
+  # 1인 회차당 최대 구매 갯수
+  # 1.5.0+: 이월 보너스는 그 회차에 구매한 플레이어에게만 개인별로 부여 (안 산 사람은 변동 없음).
+  # 당첨자 발생 시 모든 플레이어의 누적 보너스가 0으로 리셋된다.
+  # 한도 = baseline + bonus × 본인_누적_참여횟수  (cap 없음 = 무제한)
+  max-tickets-baseline: 50
+  max-tickets-bonus-per-rollover: 20
+  # max-tickets-cap: 1.5.0 부터 사용 안 함 (무제한). 키는 무시됨.
+
+  # 첫 부팅 시 풀에 미리 넣는 금액 (옵션, 0 = 비활성)
+  initial-pot-seed: 0

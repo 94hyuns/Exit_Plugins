@@ -1,0 +1,232 @@
+# ============================================
+# CustomItems — 인챈트 수치 설정 (전투 람프)
+# ============================================
+#
+# 기본(BASIC) 인챈트: 값 롤. min/max/step (+ optional bias).
+# 유니크/세트(SET) 인챈트:
+#   - 무기 유니크: 1~2 레벨 정수 롤. base + per_level × level 공식.
+#   - 방어구 세트: 부위 카운트 = 레벨. per_level / base 등 계수.
+#
+# 항목이 누락되면 코드의 기본값으로 폴백.
+#
+# *** 풀세팅 기준 (시나리오 B 평균 ≈ 50 데미지 목표) ***
+# - 다이아 풀세트 + 활력 max 2칸 × 4 + 큰최대체력 L4 + 신속 max 10% × 4
+# - 최대체력 46HP (23칸), 이동속도 +40%
+# - 무기: BASIC 공격력 max + UNIQUE L2 → 한방 ~50
+
+enchants:
+
+  # ─── 무기 기본 — 근접 공용 (값 롤) ─────────
+  # 근접 치명타는 풀에서 제외 (BASIC pool 축소). 활 치명타는 유지.
+
+  attack_power:
+    attack: { min: 3.0, max: 5.0, step: 1.0, bias: 0.0 }  # 데미지 +3/4/5 균등 분포
+
+  lifesteal:
+    heal:     { min: 1.0, max: 2.0, step: 0.1 }   # 체력 회복량 (raw HP / 2 = 칸 표시)
+    cooldown: { min: 2.0, max: 3.0, step: 1.0 }   # 쿨타임 (초)
+
+  # critical_hit: 풀에서 제외 (등록 해제됨). 기존 부여된 아이템엔 효과 적용 안 됨.
+
+  # ─── 무기 기본 — 활 전용 (값 롤) ──────────
+
+  bow_attack_power:
+    attack: { min: 1.5, max: 3.0, step: 0.1 }     # 화살에 +N 데미지
+
+  bow_critical:
+    chance: { min: 30.0, max: 50.0, step: 10.0, bias: 0.0 }   # 30/40/50% 균등 분포
+
+  # ─── 무기 유니크 (1~2 레벨, base + per×L 공식) ───
+  # 풀세팅 무기 L1 = +250%, L2 = +350% — 시나리오 B 한방 ~50.
+
+  giant_hunter:
+    base: 180.0
+    per_level: 120.0
+    reference_hp: 56.0   # 풀세팅 최대체력 (다이아 + 활력 max ×4 + 체력은국력 L4 = 56HP)
+
+  feast_fury:
+    base: 180.0
+    per_level: 120.0
+    # 허기 7칸+ 일 때 (bars-6)/4 비례
+
+  hunger_fury:
+    level_bonus_pct: [390.0, 560.0]  # L1/L2 별 최대 % (22% 버프)
+    # 유지 어려움 페널티 → 일반 UNIQUE 보다 더 강함
+
+  executioner:
+    base: 180.0
+    per_level: 120.0
+
+  rush_strike:           # 창 전용
+    base: 180.0
+    per_level: 120.0
+    reference_speed: 0.392
+
+  thunder_strike:        # 철퇴 전용
+    chance_base: 30.0
+    chance_per: 10.0     # L1=40%, L2=50% 확률
+    damage_ratio: 8.5    # 발동 시 pctBonus 합산 (additive). 22% 버프 (7.0→8.5).
+
+  twin_shot:             # 활 전용 - 이연사
+    chance_per_level: [50.0, 75.0]  # L1=50%, L2=75% 추가 발사 확률
+
+  triple_shot:           # 활 전용 - 삼연사
+    chance_per_level: [35.0, 55.0]  # L1=35%, L2=55% 추가 발사 (+2발)
+
+  quick_shot:            # 활 전용
+    thresholds: [0.20, 0.10]  # L1/L2 force 임계값
+
+  # ─── 변성램프 추가 공통 무기 유니크 (모든 무기 적용) ───
+  # 풀 확장으로 꽝 체감 완화 + 무기별 특색 강화
+
+  heavy_strike:          # 묵직한 일격 — 항상 flat +N
+    base: 5.0            # L1=10, L2=15 (base + per × level)
+    per_level: 5.0
+
+  apex_breaker:          # 정면승부 — 적 HP ≥ 50% (executioner 와 거울 대칭)
+    base: 180.0
+    per_level: 120.0
+
+  lethal_strike:         # 치명타 — 확률 발동 × 배율 (pctBonus 합연산)
+    chance_per_level: [25.0, 40.0]     # L1=25%, L2=40%
+    multiplier_per_level: [5.0, 6.0]   # L1=5배, L2=6배. 기댓값 L1=+100%, L2=+200%
+
+  # ─── 방어구 기본 (값 롤) ──────────────────
+  # 모든 값 min = max × 50% (최하옵 컷)
+
+  armor_boost:
+    armor:      { min: 2.0, max: 4.0, step: 0.1 }    # 방어도 +N
+
+  vitality:
+    max_health: { min: 1.0, max: 2.0, step: 0.1 }    # 최대체력 +N칸
+
+  swiftness:
+    movement_speed: { min: 5.0, max: 10.0, step: 0.5 }  # 이동속도 +N%
+
+  # golden_heart 는 레벨(1~3) 기반으로 코드에 고정.
+
+  # ─── 방어구 세트 (부위 카운트 = 레벨 1~4) ──
+
+  saturation_keeper:
+    base: 5.0          # 허기 캡(칸) = base - per × level → 1=4칸, 2=3칸, 3=2칸, 4=1칸
+    per_level: 1.0     # 공복의 분노 시너지 — 낮게 유지. 자연 회복 X (food < 18).
+
+  fast_recovery:
+    base: 12.0
+    per_level: 2.0
+
+  big_vitality:        # 체력은 국력 (구 큰 최대체력)
+    base: 2.0          # 최대체력 +(base + per × level)칸 → 1=4, 2=6, 3=8, 4=10칸 (2배 버프)
+    per_level: 2.0
+
+  # 가시 비활성화 (아그니로 대체)
+  # thorns:
+  #   per_level: 3.0
+
+  agni:                # 아그니 — 착용자가 발화시킨 적의 불 데미지 증폭
+    per_level: 50.0    # 1~4부위 = +50/+100/+150/+200% FIRE_TICK 데미지
+
+  will_o_wisp:         # 도깨비불 — 시각 파티클 + 공격 flat 데미지 추가
+    per_level: 1.5     # 1~4부위 = +1.5/+3/+4.5/+6 깡뎀 (근접 + 활)
+
+  lucky: {}            # 행운 — 자체 효과 없음. 부착된 부위 BASIC ×2, 다른 SET 부위 카운트 +1
+
+# ─── 방어구 SET 풀 가중치 ──────────────
+# 일반 람프 / 변성램프에서 SET 라인 뽑힐 때 enchant별 가중치.
+
+armor_set_weights:
+  # 일반 람프: non-lucky 5종 × 18 + lucky 10 = 100
+  # 변성 람프: non-lucky 5종 × 15 + lucky 25 = 100
+  # 가시 + 빠른회복 비활성화 (아그니 + 도깨비불로 대체).
+  # 5종 활성: non-lucky 4 × 22 + lucky 12 = 100 (normal), 변성: 4 × 18 + lucky 28 = 100.
+  saturation_keeper: { normal: 22, mutation: 18 }
+  # fast_recovery:     { normal: 22, mutation: 18 }   # 비활성화 (도깨비불로 대체)
+  big_vitality:      { normal: 22, mutation: 18 }
+  # thorns:            { normal: 22, mutation: 18 }   # 비활성화 (아그니로 대체)
+  agni:              { normal: 22, mutation: 18 }
+  will_o_wisp:       { normal: 22, mutation: 18 }
+  lucky:             { normal: 12, mutation: 28 }
+
+# ============================================
+# /skilllist /skillinfo 출력 텍스트
+# ============================================
+
+skills:
+
+  giant_hunter:
+    name: "거인의 힘"
+    short: "공격 시 자기 최대체력 비례 추가 데미지. (기준 28칸)"
+
+  feast_fury:
+    name: "충만한 활력"
+    short: "허기 7칸 이상에서 배부를수록 추가 데미지."
+
+  hunger_fury:
+    name: "끝없는 허기"
+    short: "허기 5칸 이하에서 배고플수록 추가 데미지. (유지 페널티로 강함)"
+
+  executioner:
+    name: "약자멸시"
+    short: "적 체력 50% 미만일 때 추가 % 데미지. (50% 정확치는 정면승부 발동)"
+
+  rush_strike:
+    name: "질주의 일격"
+    short: "창 전용. 빠르게 이동할수록 공격에 추가 데미지."
+
+  thunder_strike:
+    name: "낙뢰"
+    short: "철퇴 전용. 일정 확률로 850%의 번개 데미지 (합연산)."
+
+  twin_shot:
+    name: "이연사"
+    short: "활 전용. 확률(L1=50%/L2=75%)로 화살 1발 추가 발사."
+
+  triple_shot:
+    name: "삼연사"
+    short: "활 전용. 확률(L1=35%/L2=55%)로 화살 2발 추가 발사. 이연사와 독립 발동."
+
+  quick_shot:
+    name: "신속 사격"
+    short: "활 전용. 부분 드로우도 풀 위력으로 발사된다."
+
+  heavy_strike:
+    name: "묵직한 일격"
+    short: "공격력 +10/+15 (L1/L2). 무기 종류 무관 적용 (안정딜)."
+
+  apex_breaker:
+    name: "정면승부"
+    short: "적 체력 50% 이상일 때 추가 % 데미지. (약자멸시와 거울 대칭)"
+
+  lethal_strike:
+    name: "치명타"
+    short: "확률(L1=25%/L2=40%)로 데미지 5/6배. 무기 우클릭 스킬에도 적용."
+
+  saturation_keeper:
+    name: "공복의 저주"
+    short: "허기가 일정 칸 이상으로 회복되지 않음 (끝없는 허기 시너지). 3부위 이상에서 이동속도 +30% 보상."
+
+  # 빠른 회복 비활성화 (도깨비불로 대체)
+  # fast_recovery:
+  #   name: "빠른 회복"
+  #   short: "마지막 피격 후 일정 시간 지나면 식료/포만감 무관 자동 재생."
+
+  will_o_wisp:
+    name: "도깨비불"
+    short: "방어구 주위에 파란 영혼불이 공전. 공격 시 부위수 × 3 깡뎀 추가 (근접 · 활)."
+
+  big_vitality:
+    name: "체력은 국력"
+    short: "방어구 부위 수에 따라 최대체력 +4/6/8/10칸 증가."
+
+  # 가시 비활성화 (아그니로 대체)
+  # thorns:
+  #   name: "가시"
+  #   short: "피격 시 공격자에게 반사 데미지."
+
+  agni:
+    name: "아그니"
+    short: "착용자가 발화시킨(불속성/화염) 적의 불 데미지를 부위 수에 따라 증폭."
+
+  lucky:
+    name: "행운"
+    short: "부착된 방어구의 기본 인챈트 효과 2배. 다른 세트 인챈트의 부위 카운트에 포함됨."

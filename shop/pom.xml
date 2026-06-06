@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.exit</groupId>
+    <artifactId>shop</artifactId>
+    <version>1.8.0</version>
+    <packaging>jar</packaging>
+
+    <properties>
+        <java.version>21</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <paper.version>1.21.11-R0.1-SNAPSHOT</paper.version>
+        <paper.nms.version>1.21.11-SNAPSHOT</paper.nms.version>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>papermc</id>
+            <url>https://repo.papermc.io/repository/maven-public/</url>
+        </repository>
+        <!-- authlib, datafixerupper 등 Mojang 공식 라이브러리 -->
+        <repository>
+            <id>minecraft-libraries</id>
+            <url>https://libraries.minecraft.net/</url>
+        </repository>
+        <!-- MythicMobs (cooking_pot 판매용) -->
+        <repository>
+            <id>mythiccraft</id>
+            <url>https://mvn.lumine.io/repository/maven-public/</url>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <!-- paper-nms-maven-plugin 저장소 -->
+        <pluginRepository>
+            <id>bytecode.space</id>
+            <url>https://repo.bytecode.space/repository/maven-public/</url>
+        </pluginRepository>
+    </pluginRepositories>
+
+    <dependencies>
+        <!-- Paper API (일반 API) -->
+        <dependency>
+            <groupId>io.papermc.paper</groupId>
+            <artifactId>paper-api</artifactId>
+            <version>${paper.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Paper NMS (net.minecraft.* 클래스 접근용) -->
+        <!-- ⚠ 최초 빌드 전 반드시 `paper-nms:init` goal 실행 필요 -->
+        <dependency>
+            <groupId>ca.bkaw</groupId>
+            <artifactId>paper-nms</artifactId>
+            <version>${paper.nms.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- ⚠ paper-nms의 POM이 invalid하여 transitive deps 수동 추가 필수 -->
+        <!-- GameProfile, Property 등 Mojang authlib 클래스 -->
+        <dependency>
+            <groupId>com.mojang</groupId>
+            <artifactId>authlib</artifactId>
+            <version>6.0.57</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- NBT serialization 등에서 필요 -->
+        <dependency>
+            <groupId>com.mojang</groupId>
+            <artifactId>datafixerupper</artifactId>
+            <version>8.0.16</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- NMS의 Connection 등 Netty 기반 클래스 -->
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
+            <version>4.1.115.Final</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Core 플러그인 -->
+        <dependency>
+            <groupId>com.exit</groupId>
+            <artifactId>core</artifactId>
+            <version>1.8.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- 보관함 일괄 판매 통합 (소프트, plugin.yml softdepend) -->
+        <dependency>
+            <groupId>com.exit</groupId>
+            <artifactId>job</artifactId>
+            <version>2.5.1</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.exit</groupId>
+            <artifactId>farming</artifactId>
+            <version>1.11.3</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- cooking pack item 판매용 (소프트 의존, plugin.yml softdepend) -->
+        <dependency>
+            <groupId>io.lumine</groupId>
+            <artifactId>Mythic-Dist</artifactId>
+            <version>5.11.2</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                </configuration>
+            </plugin>
+            <!-- 빌드 시 Mojang-mapped 코드를 Spigot-mapped로 리매핑 -->
+            <plugin>
+                <groupId>ca.bkaw</groupId>
+                <artifactId>paper-nms-maven-plugin</artifactId>
+                <version>1.4.11-SNAPSHOT</version>
+                <executions>
+                    <execution>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>remap</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

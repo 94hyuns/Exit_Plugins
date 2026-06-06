@@ -1,0 +1,27 @@
+name: Fishing
+version: 1.5.2
+main: com.exit.fishing.FishingPlugin
+api-version: 1.21
+author: exit
+depend: [Core]
+softdepend: [Job]
+commands:
+  낚시:
+    description: 낚시 상점 배럴 지급 (OP)
+    usage: /낚시
+  낚시도감:
+    description: 어류 도감 GUI 오픈
+    usage: /낚시도감 [봄|여름|가을|겨울]
+    aliases: [도감]
+  계절:
+    description: 현재 계절 조회 / 설정 (OP 설정)
+    usage: /계절 [봄|여름|가을|겨울]
+  낚시리로드:
+    description: config.yml 재로드 (OP)
+    usage: /낚시리로드
+    permission: fishing.reload
+permissions:
+  fishing.admin:
+    default: op
+  fishing.reload:
+    default: op

@@ -1,0 +1,871 @@
+# ═══════════════════════════════════════════════════════════════════
+# Cosmetics 플러그인 — 카탈로그 & 뽑기/가루/뽑기권/연출 설정
+# ═══════════════════════════════════════════════════════════════════
+
+# ─── 뽑기 설정 ──────────────────────────────────────────────────────
+gacha:
+  # 뽑기권 1장 가격 (울캐쉬)
+  single_price: 1000
+  # 뽑기권 10장 묶음 가격 (할인 적용. 9000으로 두면 원가 10000 대비 10% 할인)
+  ten_price: 9000
+  # 등급별 출현 가중치
+  weights:
+    COMMON: 0
+    RARE: 85
+    UNIQUE: 10
+    LEGENDARY: 5
+
+# ─── 가루 설정 ──────────────────────────────────────────────────────
+shard:
+  refund:        # 중복 시 지급 가루
+    COMMON: 10
+    RARE: 40
+    UNIQUE: 80
+    LEGENDARY: 150
+  exchange_cost: # 교환소 가격
+    COMMON: 100
+    RARE: 500
+    UNIQUE: 1000
+    LEGENDARY: 2000
+
+# ─── 뽑기권 아이템 설정 ─────────────────────────────────────────────
+ticket:
+  base_item: PAPER
+  model_data: 3001                # 리소스팩 CustomModelData (0이면 기본 외형)
+  display_name: "§e치장 뽑기권"
+  lore:
+    - "§7우클릭하여 사용"
+    - "§8뽑기 결과는 자동으로 옷장에 추가됩니다"
+
+# ─── 탈것 뽑기권 ───────────────────────────────────────────────────
+# 탈것 카탈로그는 mounts.yml 에서 별도 관리.
+# 등급 가중치(gacha.weights)는 치장과 공유, 가루 환급(shard.refund)도 공유.
+mount_ticket:
+  base_item: PAPER
+  model_data: 3002                # 치장 뽑기권과 다른 model_data 권장 (시각적 구분)
+  display_name: "§b탈것 뽑기권"
+  lore:
+    - "§7우클릭하여 사용"
+    - "§8뽑기 결과는 자동으로 보유 탈것에 추가"
+    - "§8/ride 또는 /탈것 명령으로 소환"
+  single_price: 2000              # 1장 가격 (울캐쉬)
+  ten_price: 18000                # 10장 묶음 가격 (10% 할인)
+
+# ─── 연출 설정 ──────────────────────────────────────────────────────
+# 시간 단위는 틱(20틱 = 1초).
+animation:
+  duration_ticks: 40              # 연출 시간 (2초)
+  result_duration_ticks: 60       # 결과 표시 시간 (3초)
+  # 연출 중 무작위로 순환되는 멘트. Title의 메인 라인으로 표시.
+  rolling_messages:
+    - "§e상품 맞추는 중..."
+    - "§e경품 큐브 돌리는 중..."
+    - "§e행운을 모으는 중..."
+    - "§e운명의 주사위..."
+  rolling_subtitle: "§7잠시만 기다려 주세요"
+  # 사운드 (Bukkit Sound enum 이름)
+  rolling_sound: "BLOCK_NOTE_BLOCK_BELL"
+  result_sound: "ENTITY_PLAYER_LEVELUP"
+  legendary_sound: "UI_TOAST_CHALLENGE_COMPLETE"
+  duplicate_sound: "BLOCK_AMETHYST_BLOCK_CHIME"
+
+# ─── NPC 위치 ──────────────────────────────────────────────────────
+# /치장 setnpc 명령으로 설정됨. 수동 편집도 가능.
+# npc:
+#   world: world
+#   x: 100.5
+#   y: 64.0
+#   z: 200.5
+#   yaw: 0.0
+#   pitch: 0.0
+
+# ═══════════════════════════════════════════════════════════════════
+# 치장 카탈로그
+# ═══════════════════════════════════════════════════════════════════
+#
+# 공통 필드:
+#   id          : 고유 식별자
+#   type        : HAT / CHEST / LEGS / FEET / WEAPON / WING / TRAIL
+#   rarity      : COMMON / RARE / LEGENDARY
+#   displayName : 표시 이름 (§ 컬러 코드 가능)
+#   description : 한 줄 설명
+#   base_item   : CustomModelData를 입힐 베이스 Material
+#   model_data  : 리소스팩 CustomModelData 번호
+#
+# ARMOR/WEAPON 전용:
+#   applicable_to: [MATERIAL1, MATERIAL2, ...]  # 비어있으면 모든 경우 적용
+#
+# WING 전용:
+#   offset: [x, y, z]
+#   scale: 1.0
+#
+# TRAIL 전용:
+#   particle: FLAME       (org.bukkit.Particle enum)
+#   count: 3              (한 번에 생성할 파티클 개수)
+#   interval_ticks: 5     (생성 주기)
+#
+# ═══════════════════════════════════════════════════════════════════
+
+cosmetics:
+  # ═══════ 헬멧 (HAT) ═══════
+  - id: straw_hat
+    type: HAT
+    rarity: COMMON
+    displayName: "§f밀짚모자"
+    description: "§7시골 농부의 정겨움"
+    base_item: LEATHER_HELMET
+    asset_id: straw_hat
+    model_data: 1001
+    applicable_to:
+      - LEATHER_HELMET
+      - IRON_HELMET
+      - DIAMOND_HELMET
+      - NETHERITE_HELMET
+      - TURTLE_HELMET
+
+  - id: barbute
+    type: HAT
+    rarity: COMMON
+    displayName: "§7바르베트"
+    description: "§7이탈리아 보병의 헬멧"
+    base_item: IRON_HELMET
+    asset_id: barbute
+    model_data: 1002
+    applicable_to:
+      - LEATHER_HELMET
+      - IRON_HELMET
+      - DIAMOND_HELMET
+      - NETHERITE_HELMET
+      - TURTLE_HELMET
+
+  - id: top_hat
+    type: HAT
+    rarity: RARE
+    displayName: "§e신사 모자"
+    description: "§7격식있는 외출 필수품"
+    base_item: LEATHER_HELMET
+    asset_id: top_hat
+    model_data: 1003
+    applicable_to:
+      - LEATHER_HELMET
+      - IRON_HELMET
+      - DIAMOND_HELMET
+      - NETHERITE_HELMET
+      - TURTLE_HELMET
+
+  - id: sallet
+    type: HAT
+    rarity: RARE
+    displayName: "§b살레"
+    description: "§7르네상스 기사 헬멧"
+    base_item: IRON_HELMET
+    asset_id: sallet
+    model_data: 1004
+    applicable_to:
+      - LEATHER_HELMET
+      - IRON_HELMET
+      - DIAMOND_HELMET
+      - NETHERITE_HELMET
+      - TURTLE_HELMET
+
+  - id: armet
+    type: HAT
+    rarity: RARE
+    displayName: "§b아르멧"
+    description: "§7풀페이스 전투 헬멧"
+    base_item: IRON_HELMET
+    asset_id: armet
+    model_data: 1005
+    applicable_to:
+      - LEATHER_HELMET
+      - IRON_HELMET
+      - DIAMOND_HELMET
+      - NETHERITE_HELMET
+      - TURTLE_HELMET
+
+  - id: landsknecht_red_hat
+    type: HAT
+    rarity: RARE
+    displayName: "§c빨강 깃털 모자"
+    description: "§7란츠크네히트 보병"
+    base_item: LEATHER_HELMET
+    asset_id: landsknecht_red_hat
+    model_data: 1006
+    applicable_to:
+      - LEATHER_HELMET
+      - IRON_HELMET
+      - DIAMOND_HELMET
+      - NETHERITE_HELMET
+      - TURTLE_HELMET
+
+  - id: crown_gold
+    type: HAT
+    rarity: LEGENDARY
+    displayName: "§6황금 왕관"
+    description: "§e왕의 풍모"
+    base_item: GOLDEN_HELMET
+    asset_id: crown_gold
+    model_data: 1007
+    applicable_to:
+      - LEATHER_HELMET
+      - GOLDEN_HELMET
+      - IRON_HELMET
+      - DIAMOND_HELMET
+      - NETHERITE_HELMET
+      - TURTLE_HELMET
+
+  # ═══════ 갑옷 SET (CHEST + LEGS + FEET 코디네이트) ═══════
+  # 같은 set 의 chest/legs/boots 는 동일 asset_id 사용 (texture 공유)
+
+  # ── 감브슨 (직물, COMMON) ──
+  - id: gambeson_chestplate
+    type: CHEST
+    rarity: COMMON
+    displayName: "§f감브슨 흉의"
+    description: "§7누빔 직물 옷"
+    base_item: DIAMOND_CHESTPLATE
+    asset_id: gambeson
+    model_data: 1101
+    applicable_to:
+      - DIAMOND_CHESTPLATE
+      - NETHERITE_CHESTPLATE
+
+  - id: gambeson_leggings
+    type: LEGS
+    rarity: COMMON
+    displayName: "§f감브슨 각반"
+    description: "§7누빔 직물 바지"
+    base_item: DIAMOND_LEGGINGS
+    asset_id: gambeson
+    model_data: 1201
+    applicable_to:
+      - DIAMOND_LEGGINGS
+      - NETHERITE_LEGGINGS
+
+  - id: gambeson_boots
+    type: FEET
+    rarity: COMMON
+    displayName: "§f감브슨 신발"
+    description: "§7누빔 직물 부츠"
+    base_item: DIAMOND_BOOTS
+    asset_id: gambeson
+    model_data: 1301
+    applicable_to:
+      - DIAMOND_BOOTS
+      - NETHERITE_BOOTS
+
+  # ── 체인메일 (사슬, COMMON) ──
+  - id: chainmail_chestplate
+    type: CHEST
+    rarity: COMMON
+    displayName: "§7체인메일 흉갑"
+    description: "§7촘촘히 엮인 사슬"
+    base_item: DIAMOND_CHESTPLATE
+    asset_id: chainmail
+    model_data: 1102
+    applicable_to:
+      - DIAMOND_CHESTPLATE
+      - NETHERITE_CHESTPLATE
+
+  - id: chainmail_leggings
+    type: LEGS
+    rarity: COMMON
+    displayName: "§7체인메일 각반"
+    description: "§7사슬 다리 보호구"
+    base_item: DIAMOND_LEGGINGS
+    asset_id: chainmail
+    model_data: 1202
+    applicable_to:
+      - DIAMOND_LEGGINGS
+      - NETHERITE_LEGGINGS
+
+  - id: chainmail_boots
+    type: FEET
+    rarity: COMMON
+    displayName: "§7체인메일 부츠"
+    description: "§7사슬 군화"
+    base_item: DIAMOND_BOOTS
+    asset_id: chainmail
+    model_data: 1302
+    applicable_to:
+      - DIAMOND_BOOTS
+      - NETHERITE_BOOTS
+
+  # ── 기사 (클래식 풀플레이트, RARE) ──
+  - id: knight_chestplate
+    type: CHEST
+    rarity: RARE
+    displayName: "§b기사 흉갑"
+    description: "§7빛나는 기사단의 상징"
+    base_item: DIAMOND_CHESTPLATE
+    asset_id: knight
+    model_data: 1103
+    applicable_to:
+      - DIAMOND_CHESTPLATE
+      - NETHERITE_CHESTPLATE
+
+  - id: knight_leggings
+    type: LEGS
+    rarity: RARE
+    displayName: "§b기사 각반"
+    description: "§7움직임을 방해하지 않는 명품"
+    base_item: DIAMOND_LEGGINGS
+    asset_id: knight
+    model_data: 1203
+    applicable_to:
+      - DIAMOND_LEGGINGS
+      - NETHERITE_LEGGINGS
+
+  - id: knight_boots
+    type: FEET
+    rarity: RARE
+    displayName: "§b기사 군화"
+    description: "§7대장장이의 수공예"
+    base_item: DIAMOND_BOOTS
+    asset_id: knight
+    model_data: 1303
+    applicable_to:
+      - DIAMOND_BOOTS
+      - NETHERITE_BOOTS
+
+  # ── 브리간딘 (가죽판, RARE) ──
+  - id: brigandine_chestplate
+    type: CHEST
+    rarity: RARE
+    displayName: "§6브리간딘 흉갑"
+    description: "§7가죽에 금속판을 박은 갑옷"
+    base_item: DIAMOND_CHESTPLATE
+    asset_id: dark_heavy_brigandine
+    model_data: 1104
+    applicable_to:
+      - DIAMOND_CHESTPLATE
+      - NETHERITE_CHESTPLATE
+
+  - id: brigandine_leggings
+    type: LEGS
+    rarity: RARE
+    displayName: "§6브리간딘 각반"
+    description: "§7가벼우면서 단단한"
+    base_item: DIAMOND_LEGGINGS
+    asset_id: dark_heavy_brigandine
+    model_data: 1204
+    applicable_to:
+      - DIAMOND_LEGGINGS
+      - NETHERITE_LEGGINGS
+
+  - id: brigandine_boots
+    type: FEET
+    rarity: RARE
+    displayName: "§6브리간딘 부츠"
+    description: "§7가죽 신발에 강철판"
+    base_item: DIAMOND_BOOTS
+    asset_id: dark_heavy_brigandine
+    model_data: 1304
+    applicable_to:
+      - DIAMOND_BOOTS
+      - NETHERITE_BOOTS
+
+  # ── 고딕 (어두운 고딕, LEGENDARY) — 용린 갑옷 대체 ──
+  - id: gothic_chestplate
+    type: CHEST
+    rarity: LEGENDARY
+    displayName: "§5고딕 흉갑"
+    description: "§8어둠을 두른 강철"
+    base_item: NETHERITE_CHESTPLATE
+    asset_id: gothic
+    model_data: 1105
+    applicable_to:
+      - DIAMOND_CHESTPLATE
+      - NETHERITE_CHESTPLATE
+
+  - id: gothic_leggings
+    type: LEGS
+    rarity: LEGENDARY
+    displayName: "§5고딕 각반"
+    description: "§8빛을 흡수하는 다리"
+    base_item: NETHERITE_LEGGINGS
+    asset_id: gothic
+    model_data: 1205
+    applicable_to:
+      - DIAMOND_LEGGINGS
+      - NETHERITE_LEGGINGS
+
+  - id: gothic_boots
+    type: FEET
+    rarity: LEGENDARY
+    displayName: "§5고딕 부츠"
+    description: "§8발소리 없는 강철"
+    base_item: NETHERITE_BOOTS
+    asset_id: gothic
+    model_data: 1305
+    applicable_to:
+      - DIAMOND_BOOTS
+      - NETHERITE_BOOTS
+
+  # ── 황금 카스텐브루스트 (LEGENDARY) ──
+  - id: gilded_chestplate
+    type: CHEST
+    rarity: LEGENDARY
+    displayName: "§6황금 흉갑"
+    description: "§e전신을 두른 황금"
+    base_item: NETHERITE_CHESTPLATE
+    asset_id: fully_gilded_kastenbrust
+    model_data: 1106
+    applicable_to:
+      - DIAMOND_CHESTPLATE
+      - NETHERITE_CHESTPLATE
+
+  - id: gilded_leggings
+    type: LEGS
+    rarity: LEGENDARY
+    displayName: "§6황금 각반"
+    description: "§e걸음마다 빛나는"
+    base_item: NETHERITE_LEGGINGS
+    asset_id: fully_gilded_kastenbrust
+    model_data: 1206
+    applicable_to:
+      - DIAMOND_LEGGINGS
+      - NETHERITE_LEGGINGS
+
+  - id: gilded_boots
+    type: FEET
+    rarity: LEGENDARY
+    displayName: "§6황금 부츠"
+    description: "§e황금의 발걸음"
+    base_item: NETHERITE_BOOTS
+    asset_id: fully_gilded_kastenbrust
+    model_data: 1306
+    applicable_to:
+      - DIAMOND_BOOTS
+      - NETHERITE_BOOTS
+
+  # ═══════ 무기 (주손) ═══════
+  # applicable_to가 있으면 해당 Material을 들었을 때만 스킨 적용
+  # DUMMY: 리소스팩 모델 미연결, 자산 준비 후 재활성
+  # - id: flame_blade
+  #   type: WEAPON
+  #   rarity: RARE
+  #   displayName: "§c화염검"
+  #   description: "§7타오르는 검신"
+  #   base_item: IRON_SWORD
+  #   model_data: 4001
+  #   applicable_to:
+  #     - IRON_SWORD
+  #     - DIAMOND_SWORD
+  #     - NETHERITE_SWORD
+  #
+  # - id: excalibur
+  #   type: WEAPON
+  #   rarity: LEGENDARY
+  #   displayName: "§b엑스칼리버"
+  #   description: "§3선택받은 자의 검"
+  #   base_item: NETHERITE_SWORD
+  #   model_data: 4002
+  #   applicable_to:
+  #     - DIAMOND_SWORD
+  #     - NETHERITE_SWORD
+
+  - id: skymeteor_sword
+    type: WEAPON
+    rarity: RARE
+    displayName: "§b스카이미티어"
+    description: "§3별의 조각으로 벼려낸 검"
+    base_item: NETHERITE_SWORD
+    model_data: 4003
+    applicable_to:
+      - IRON_SWORD
+      - DIAMOND_SWORD
+      - NETHERITE_SWORD
+
+  - id: tree_sword
+    type: WEAPON
+    rarity: RARE
+    displayName: "§a생명의 나무검"
+    description: "§7세계수의 가지로 만든 검"
+    base_item: IRON_SWORD
+    model_data: 4004
+    applicable_to:
+      - IRON_SWORD
+      - DIAMOND_SWORD
+      - NETHERITE_SWORD
+
+  - id: vine_sword
+    type: WEAPON
+    rarity: RARE
+    displayName: "§2덩굴검"
+    description: "§7숲의 정령이 깃든 검"
+    base_item: IRON_SWORD
+    model_data: 4005
+    applicable_to:
+      - IRON_SWORD
+      - DIAMOND_SWORD
+      - NETHERITE_SWORD
+
+  - id: sentient_sword
+    type: WEAPON
+    rarity: UNIQUE
+    displayName: "§5잠식의 검"
+    description: "§7기생체에 잠식된 검신"
+    base_item: IRON_SWORD
+    model_data: 4006
+    applicable_to:
+      - IRON_SWORD
+      - DIAMOND_SWORD
+      - NETHERITE_SWORD
+
+  - id: sentient_bow
+    type: WEAPON
+    rarity: UNIQUE
+    displayName: "§5잠식의 활"
+    description: "§7살아 숨쉬는 활"
+    base_item: BOW
+    model_data: 4007
+    applicable_to:
+      - BOW
+
+  - id: sentient_scythe
+    type: WEAPON
+    rarity: UNIQUE
+    displayName: "§5잠식의 낫"
+    description: "§7기생충이 똬리튼 낫"
+    base_item: IRON_HOE
+    model_data: 4008
+    applicable_to:
+      - WOODEN_HOE
+      - STONE_HOE
+      - IRON_HOE
+      - GOLDEN_HOE
+      - DIAMOND_HOE
+      - NETHERITE_HOE
+
+  - id: sentient_cleaver
+    type: WEAPON
+    rarity: UNIQUE
+    displayName: "§5잠식의 식칼"
+    description: "§7고기 가르는 잠식체"
+    base_item: MACE
+    model_data: 4009
+    applicable_to:
+      - MACE
+
+  - id: sentient_axe
+    type: WEAPON
+    rarity: UNIQUE
+    displayName: "§5잠식의 도끼"
+    description: "§7뼈를 부수는 잠식체"
+    base_item: IRON_AXE
+    model_data: 4010
+    applicable_to:
+      - WOODEN_AXE
+      - STONE_AXE
+      - IRON_AXE
+      - GOLDEN_AXE
+      - DIAMOND_AXE
+      - NETHERITE_AXE
+
+
+
+
+
+  # ─── Nongko's Fantasy Weapons (1차+곡괭이 등록, CMD 4100~4136) ───
+  - id: nfw_calamity_blade
+    type: WEAPON
+    rarity: UNIQUE
+    displayName: "§dCalamity Blade"
+    base_item: IRON_SWORD
+    model_data: 4100
+    applicable_to: [IRON_SWORD, DIAMOND_SWORD, NETHERITE_SWORD]
+  - id: nfw_demonslayers_greatsword
+    type: WEAPON
+    rarity: RARE
+    displayName: "§aDemonslayer's Greatsword"
+    base_item: IRON_SWORD
+    model_data: 4101
+    applicable_to: [IRON_SWORD, DIAMOND_SWORD, NETHERITE_SWORD]
+  - id: nfw_grand_claymore
+    type: WEAPON
+    rarity: UNIQUE
+    displayName: "§dGrand Claymore"
+    base_item: IRON_SWORD
+    model_data: 4102
+    applicable_to: [IRON_SWORD, DIAMOND_SWORD, NETHERITE_SWORD]
+  - id: nfw_valhakyra
+    type: WEAPON
+    rarity: LEGENDARY
+    displayName: "§6Valhakyra"
+    base_item: IRON_SWORD
+    model_data: 4104
+    applicable_to: [IRON_SWORD, DIAMOND_SWORD, NETHERITE_SWORD]
+  - id: nfw_amethyst_greatblade
+    type: WEAPON
+    rarity: UNIQUE
+    displayName: "§dAmethyst Greatblade"
+    base_item: IRON_SWORD
+    model_data: 4106
+    applicable_to: [IRON_SWORD, DIAMOND_SWORD, NETHERITE_SWORD]
+  - id: nfw_ancient_greatslab
+    type: WEAPON
+    rarity: UNIQUE
+    displayName: "§dAncient Greatslab"
+    base_item: MACE
+    model_data: 4107
+    applicable_to: [MACE]
+  - id: nfw_berserkers_greataxe
+    type: WEAPON
+    rarity: LEGENDARY
+    displayName: "§6Berserker's Greataxe"
+    base_item: IRON_AXE
+    model_data: 4108
+    applicable_to: [IRON_AXE, DIAMOND_AXE, NETHERITE_AXE]
+  - id: nfw_crescent_greataxe
+    type: WEAPON
+    rarity: LEGENDARY
+    displayName: "§6Crescent Spear"
+    base_item: TRIDENT
+    model_data: 4109
+    applicable_to: [TRIDENT, WOODEN_SPEAR, STONE_SPEAR, IRON_SPEAR, GOLDEN_SPEAR, DIAMOND_SPEAR, NETHERITE_SPEAR, COPPER_SPEAR]
+  - id: nfw_gilded_phoenix_greataxe
+    type: WEAPON
+    rarity: LEGENDARY
+    displayName: "§6Gilded Phoenix Greataxe"
+    base_item: IRON_AXE
+    model_data: 4110
+    applicable_to: [IRON_AXE, DIAMOND_AXE, NETHERITE_AXE]
+  - id: nfw_heavenly_partisan
+    type: WEAPON
+    rarity: LEGENDARY
+    displayName: "§6Heavenly Partisan"
+    base_item: IRON_SWORD
+    model_data: 4111
+    applicable_to: [IRON_SWORD, DIAMOND_SWORD, NETHERITE_SWORD]
+  - id: nfw_azure_sabre
+    type: WEAPON
+    rarity: RARE
+    displayName: "§aAzure Sabre"
+    base_item: IRON_SWORD
+    model_data: 4112
+    applicable_to: [IRON_SWORD, DIAMOND_SWORD, NETHERITE_SWORD]
+  - id: nfw_azure_greatsword
+    type: WEAPON
+    rarity: RARE
+    displayName: "§aAzure Greatsword"
+    base_item: IRON_SWORD
+    model_data: 4113
+    applicable_to: [IRON_SWORD, DIAMOND_SWORD, NETHERITE_SWORD]
+  - id: nfw_azure_scythe
+    type: WEAPON
+    rarity: RARE
+    displayName: "§aAzure Scythe"
+    base_item: IRON_SWORD
+    model_data: 4114
+    applicable_to: [IRON_SWORD, DIAMOND_SWORD, NETHERITE_SWORD]
+  - id: nfw_crystal_frostblade
+    type: WEAPON
+    rarity: RARE
+    displayName: "§aCrystal Frostblade"
+    base_item: IRON_SWORD
+    model_data: 4115
+    applicable_to: [IRON_SWORD, DIAMOND_SWORD, NETHERITE_SWORD]
+  - id: nfw_demons_blood_blade
+    type: WEAPON
+    rarity: RARE
+    displayName: "§aDemon's Blood Blade"
+    base_item: IRON_SWORD
+    model_data: 4116
+    applicable_to: [IRON_SWORD, DIAMOND_SWORD, NETHERITE_SWORD]
+  - id: nfw_dragon_sword
+    type: WEAPON
+    rarity: RARE
+    displayName: "§aDragon Sword"
+    base_item: IRON_SWORD
+    model_data: 4117
+    applicable_to: [IRON_SWORD, DIAMOND_SWORD, NETHERITE_SWORD]
+  - id: nfw_lycanbane
+    type: WEAPON
+    rarity: RARE
+    displayName: "§aLycanbane"
+    base_item: IRON_SWORD
+    model_data: 4118
+    applicable_to: [IRON_SWORD, DIAMOND_SWORD, NETHERITE_SWORD]
+  - id: nfw_moonlight
+    type: WEAPON
+    rarity: UNIQUE
+    displayName: "§dMoonlight"
+    base_item: IRON_SWORD
+    model_data: 4119
+    applicable_to: [IRON_SWORD, DIAMOND_SWORD, NETHERITE_SWORD]
+  - id: nfw_nature_sword
+    type: WEAPON
+    rarity: RARE
+    displayName: "§aNature Sword"
+    base_item: IRON_SWORD
+    model_data: 4120
+    applicable_to: [IRON_SWORD, DIAMOND_SWORD, NETHERITE_SWORD]
+  - id: nfw_spider_sword
+    type: WEAPON
+    rarity: RARE
+    displayName: "§aSpider Sword"
+    base_item: IRON_SWORD
+    model_data: 4121
+    applicable_to: [IRON_SWORD, DIAMOND_SWORD, NETHERITE_SWORD]
+  - id: nfw_azure_greataxe
+    type: WEAPON
+    rarity: RARE
+    displayName: "§aAzure Greataxe"
+    base_item: IRON_AXE
+    model_data: 4122
+    applicable_to: [IRON_AXE, DIAMOND_AXE, NETHERITE_AXE]
+  - id: nfw_crimson_cleaver
+    type: WEAPON
+    rarity: RARE
+    displayName: "§aCrimson Cleaver"
+    base_item: MACE
+    model_data: 4123
+    applicable_to: [MACE]
+  - id: nfw_emerald_greatcleaver
+    type: WEAPON
+    rarity: RARE
+    displayName: "§aEmerald Greatcleaver"
+    base_item: MACE
+    model_data: 4124
+    applicable_to: [MACE]
+  - id: nfw_iron_battle_axe
+    type: WEAPON
+    rarity: RARE
+    displayName: "§aIron Battle Axe"
+    base_item: IRON_AXE
+    model_data: 4125
+    applicable_to: [IRON_AXE, DIAMOND_AXE, NETHERITE_AXE]
+  - id: nfw_sacrificial_cleaver
+    type: WEAPON
+    rarity: RARE
+    displayName: "§aSacrificial Cleaver"
+    base_item: MACE
+    model_data: 4126
+    applicable_to: [MACE]
+  - id: nfw_iron_halberd
+    type: WEAPON
+    rarity: RARE
+    displayName: "§aIron Halberd"
+    base_item: TRIDENT
+    model_data: 4127
+    applicable_to: [TRIDENT, WOODEN_SPEAR, STONE_SPEAR, IRON_SPEAR, GOLDEN_SPEAR, DIAMOND_SPEAR, NETHERITE_SPEAR, COPPER_SPEAR]
+  - id: nfw_phantomguard_partisan
+    type: WEAPON
+    rarity: RARE
+    displayName: "§aPhantomguard Partisan"
+    base_item: TRIDENT
+    model_data: 4128
+    applicable_to: [TRIDENT, WOODEN_SPEAR, STONE_SPEAR, IRON_SPEAR, GOLDEN_SPEAR, DIAMOND_SPEAR, NETHERITE_SPEAR, COPPER_SPEAR]
+  - id: nfw_runic_piercer
+    type: WEAPON
+    rarity: RARE
+    displayName: "§aRunic Piercer"
+    base_item: TRIDENT
+    model_data: 4129
+    applicable_to: [TRIDENT, WOODEN_SPEAR, STONE_SPEAR, IRON_SPEAR, GOLDEN_SPEAR, DIAMOND_SPEAR, NETHERITE_SPEAR, COPPER_SPEAR]
+  - id: nfw_iron_mace
+    type: WEAPON
+    rarity: RARE
+    displayName: "§aIron Mace"
+    base_item: MACE
+    model_data: 4130
+    applicable_to: [MACE]
+  - id: nfw_treacherous_bludgeon
+    type: WEAPON
+    rarity: UNIQUE
+    displayName: "§dTreacherous Bludgeon"
+    base_item: MACE
+    model_data: 4131
+    applicable_to: [MACE]
+  - id: nfw_talonpick
+    type: WEAPON
+    rarity: RARE
+    displayName: "§aTalonpick"
+    base_item: IRON_PICKAXE
+    model_data: 4132
+    applicable_to: [WOODEN_PICKAXE, STONE_PICKAXE, IRON_PICKAXE, GOLDEN_PICKAXE, DIAMOND_PICKAXE, NETHERITE_PICKAXE]
+  - id: nfw_amethyst_greatpick
+    type: WEAPON
+    rarity: LEGENDARY
+    displayName: "§6Amethyst Greatpick"
+    base_item: IRON_PICKAXE
+    model_data: 4133
+    applicable_to: [WOODEN_PICKAXE, STONE_PICKAXE, IRON_PICKAXE, GOLDEN_PICKAXE, DIAMOND_PICKAXE, NETHERITE_PICKAXE]
+  - id: nfw_viridian_pickaxe
+    type: WEAPON
+    rarity: UNIQUE
+    displayName: "§dViridian Pickaxe"
+    base_item: IRON_PICKAXE
+    model_data: 4134
+    applicable_to: [WOODEN_PICKAXE, STONE_PICKAXE, IRON_PICKAXE, GOLDEN_PICKAXE, DIAMOND_PICKAXE, NETHERITE_PICKAXE]
+  - id: nfw_demons_blood_pick
+    type: WEAPON
+    rarity: RARE
+    displayName: "§aDemon's Blood Pick"
+    base_item: IRON_PICKAXE
+    model_data: 4135
+    applicable_to: [WOODEN_PICKAXE, STONE_PICKAXE, IRON_PICKAXE, GOLDEN_PICKAXE, DIAMOND_PICKAXE, NETHERITE_PICKAXE]
+  - id: nfw_azure_pickaxe
+    type: WEAPON
+    rarity: RARE
+    displayName: "§aAzure Pickaxe"
+    base_item: IRON_PICKAXE
+    model_data: 4136
+    applicable_to: [WOODEN_PICKAXE, STONE_PICKAXE, IRON_PICKAXE, GOLDEN_PICKAXE, DIAMOND_PICKAXE, NETHERITE_PICKAXE]
+
+  # ═══════ 날개 ═══════
+  # DUMMY: 리소스팩 모델 미연결, 자산 준비 후 재활성
+  # - id: butterfly_wings
+  #   type: WING
+  #   rarity: COMMON
+  #   displayName: "§d나비 날개"
+  #   description: "§7봄바람에 살랑이는"
+  #   base_item: PAPER
+  #   model_data: 2001
+  #   offset: [0.0, 0.3, -0.3]
+  #   scale: 0.8
+  #
+  # - id: dragon_wings
+  #   type: WING
+  #   rarity: LEGENDARY
+  #   displayName: "§c드래곤 날개"
+  #   description: "§4태초의 용의 기운"
+  #   base_item: PAPER
+  #   model_data: 2002
+  #   offset: [0.0, 0.4, -0.35]
+  #   scale: 1.2
+
+  # ═══════ 트레일 ═══════
+  - id: petal_trail
+    type: TRAIL
+    rarity: COMMON
+    displayName: "§d꽃잎 트레일"
+    description: "§7발걸음마다 흩날리는"
+    base_item: PINK_PETALS
+    model_data: 0
+    particle: CHERRY_LEAVES
+    count: 3
+    interval_ticks: 5
+
+  - id: flame_trail
+    type: TRAIL
+    rarity: RARE
+    displayName: "§c불꽃 트레일"
+    description: "§7뜨거운 발자국"
+    base_item: BLAZE_POWDER
+    model_data: 0
+    particle: FLAME
+    count: 4
+    interval_ticks: 4
+
+  - id: soul_trail
+    type: TRAIL
+    rarity: LEGENDARY
+    displayName: "§b영혼의 트레일"
+    description: "§3망자의 속삭임"
+    base_item: SOUL_LANTERN
+    model_data: 0
+    particle: SOUL_FIRE_FLAME
+    count: 5
+    interval_ticks: 3
