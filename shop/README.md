@@ -89,7 +89,7 @@ items:
 3. Shop이 `FishShopProvider` (Core 경유) 로 `openShop(player)` 호출
 4. Fishing 플러그인의 계절별 GUI 오픈
 
-## 4~8인 서버 기준 데이터 구조
+## 4-8인 서버 기준 데이터 구조
 
 - `plugins/Shop/config.yml`: 아이템 카탈로그
 - `plugins/Shop/npcs.yml`: NPC 위치/스킨
