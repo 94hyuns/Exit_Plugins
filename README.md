@@ -1,13 +1,13 @@
 # Exit MC Plugins
 
-Paper 1.21.x 기반 바이브코딩으로 만든 자체 제작 마인크래프트 플러그인 monorepo. 4~8인 소규모 사설 서버 운영에서 검증된 11종 플러그인 모음.
+Paper 1.21.x 기반 바이브코딩으로 만든 자체 제작 마인크래프트 플러그인 monorepo. 4~8인 소규모 사설 서버 운영에서 검증된 12종 플러그인 모음.
 
 ## 플러그인 목록
 
 | 플러그인 | 주요 기능 | 외부 의존 |
 |---|---|---|
 | **core** | PlayerDataManager(SQLite), ServiceRegistry, Provider 인터페이스(Economy/Lamp/Cosmetic/FishShop/Crop/FarmlandTicket), BalanceChangeEvent/ShardChangeEvent, 한글 명령어 두벌식 alias | paper-nms |
-| **economy** *(미공개 자리)* | 울캐쉬 화폐 — 이번 monorepo 에 미포함 | - |
+| **economy** | 울캐쉬(`w`) 화폐 시스템, `EconomyProvider` 구현, 지폐 아이템 (PDC 기반), 잔액 스코어보드 | - |
 | **land** | 청크 단위 땅 구매/관리, Core EconomyProvider 연동 | - |
 | **shop** | NPC 기반 4-카테고리 상점 (광물/작물/램프/낚시), provider 라우팅, 시세 변동 | paper-nms, MythicMobs (soft) |
 | **custom-items** | 커스텀 인챈트 ("램프") + 동시 도구 시스템 | MythicMobs (soft), Job/Fishing/Farming (soft) |

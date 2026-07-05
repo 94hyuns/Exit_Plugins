@@ -1,6 +1,6 @@
 # Pre-built plugin jars
 
-이 폴더는 Paper 서버에 바로 넣을 수 있는 **사전 빌드된 jar 11개** 모음입니다.
+이 폴더는 Paper 서버에 바로 넣을 수 있는 **사전 빌드된 jar 12개** 모음입니다.
 운영 검증된 최신 버전이므로 별도 빌드 없이 사용 가능.
 
 ## 사용법
@@ -16,7 +16,7 @@ cp *.jar /path/to/your-paper-server/plugins/
 | 파일 | 버전 | 설명 | 소스 |
 |---|---|---|---|
 | `core-1.8.0.jar` | 1.8.0 | PlayerDataManager, ServiceRegistry, Provider 인터페이스 | [../core/](../core/) |
-| `economy-?` | — | 본 repo 미포함 (외부 economy 플러그인 별도 설치 필요) | — |
+| `economy-1.0.0.jar` | 1.0.0 | 울캐쉬(`w`) 화폐 + 지폐 아이템 | [../economy/](../economy/) |
 | `land-1.1.2.jar` | 1.1.2 | 청크 단위 땅 구매/관리 | [../land/](../land/) |
 | `shop-1.8.0.jar` | 1.8.0 | NPC 4-카테고리 상점 + 시세 변동 | [../shop/](../shop/) |
 | `CustomItems-1.9.0.jar` | 1.9.0 | 커스텀 인챈트 ("램프") | [../custom-items/](../custom-items/) |
@@ -34,7 +34,6 @@ cp *.jar /path/to/your-paper-server/plugins/
 
 - **MythicMobs** — [공식 사이트](https://www.mythicmobs.net/) (`dungeon-rewards` 는 hard depend)
 - **ModelEngine** — [Ticxo 공식](https://github.com/Ticxo/Model-Engine) (`cosmetics` 의 모델 시스템 soft depend)
-- **Economy 플러그인** (예: Vault + Essentials 등) — Land/Shop 의 잔액 차감에 필요
 
 없어도 다른 플러그인 기능은 정상 동작 (런타임 가드).
 

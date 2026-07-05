@@ -1,0 +1,26 @@
+name: Economy
+version: 1.0.0
+main: com.exit.economy.EconomyPlugin
+api-version: 1.21
+description: 울캐쉬 화폐 시스템
+depend: [Core]
+
+commands:
+  출금:
+    description: 잔액에서 울캐쉬 종이를 출금합니다
+    usage: /출금 <금액>
+    aliases: [withdraw]
+  입금:
+    description: 들고 있는 울캐쉬 종이를 입금합니다
+    usage: /입금
+    aliases: [deposit]
+  송금:
+    description: "[관리자] 플레이어에게 울캐쉬를 송금합니다"
+    usage: /송금 <플레이어> <금액>
+    aliases: [transfer]
+    permission: economy.admin
+
+permissions:
+  economy.admin:
+    description: 관리자 경제 명령어 사용 권한
+    default: op
