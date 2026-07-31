@@ -1,6 +1,16 @@
 # Exit MC Plugins
 
-Paper 1.21.x 기반 바이브코딩으로 만든 자체 제작 마인크래프트 플러그인 monorepo. 4~8인 소규모 사설 서버 운영에서 검증된 12종 플러그인 모음.
+Paper 1.21.x 기반 자체 제작 마인크래프트 플러그인 monorepo. 4~8인 소규모 사설 서버에서 한 달간 운영하며 검증한 12종 플러그인 모음.
+
+## 구조
+
+기능이 늘면서 단일 플러그인으로는 한 곳을 고칠 때 다른 곳이 깨지는 문제가 생겨, 기능별로 플러그인을 분리하고 다음 세 가지 원칙을 세웠습니다.
+
+**기능 플러그인끼리 직접 참조하지 않는다.** 모든 플러그인은 Core에만 의존합니다. 연결은 Core에 선언한 Provider 인터페이스(Economy/Lamp/Cosmetic/FishShop/Crop/FarmlandTicket)로만 이뤄지고, 구현체는 런타임에 ServiceRegistry로 등록합니다. 그래서 Shop은 `LampProvider` 만 알면 되고 CustomItems 를 직접 import 하지 않습니다.
+
+**빠진 플러그인이 있어도 서버는 뜬다.** Provider 가 등록돼 있지 않으면 해당 기능만 조용히 비활성화됩니다. 아래 표에서 대부분의 의존이 soft 로 표시된 이유입니다.
+
+**플레이어 데이터는 한 곳에서 관리한다.** 플러그인마다 YAML 을 따로 두지 않고 Core 의 PlayerDataManager(SQLite)로 통합했고, 잔액 변경 같은 상태 변화는 BalanceChangeEvent / ShardChangeEvent 로 발행해 다른 플러그인이 구독합니다.
 
 ## 플러그인 목록
 
@@ -214,3 +224,8 @@ cd ../exit-gamble && mvn package
 ---
 
 *이번 시즌 4-8인 사설 서버에서 1개월 가량 운영하면서 검증된 코드입니다. 외부 자산 (BlockBench 모델, 외부 작가 텍스처 등) 은 별도 사용권 문제로 본 repo 에서 제외됩니다.*
+
+*플러그인 구성과 구조 결정은 직접 했으며, 구현 단계에서 Claude Code 를 보조 도구로 활용했습니다.*
+
+
+*플러그인 구성과 구조 결정은 직접 했으며, 구현 단계에서 Claude Code 를 보조 도구로 활용했습니다.*
