@@ -55,3 +55,9 @@ mvn package
 
 - `plugins/World/worlds.yml` — 월드 정의 (재시작 필수)
 - `plugins/World/dungeons.yml` — 보스/던전 설정 (`/던전마스터 reload` 가능)
+
+## 월드 zip 배치
+
+마을·던전 월드는 외부 맵을 기반으로 만든 것이라 저장소와 jar 에 포함하지 않습니다.
+복원 기능을 쓰려면 서버의 `plugins/World/worlds/` 에 `<월드이름>.zip` 을 직접 넣어야 합니다.
+zip 최상위 폴더명은 월드 이름과 같아야 하며, 파일이 없으면 복원을 건너뛰고 빈 월드를 생성합니다.

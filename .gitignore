@@ -49,3 +49,7 @@ backups/
 .env
 .env.*
 *.local
+
+# ─── 월드 zip (외부 맵 기반, 재배포 불가) ─────────────────
+# 서버의 plugins/World/worlds/ 에 운영자가 직접 넣는다.
+world/src/main/resources/worlds/

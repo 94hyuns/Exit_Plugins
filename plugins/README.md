@@ -26,7 +26,7 @@ cp *.jar /path/to/your-paper-server/plugins/
 | `Fishing-1.5.1.jar` | 1.5.1 | 계절별 낚시 시스템 | [../fishing/](../fishing/) |
 | `rewards-1.2.0.jar` | 1.2.0 | 보스 처치 보상 (dungeon-rewards) | [../dungeon-rewards/](../dungeon-rewards/) |
 | `exit-gamble-1.5.1.jar` | 1.5.1 | 슬롯/로또 미니게임 | [../exit-gamble/](../exit-gamble/) |
-| `world-1.4.0.jar` | 1.4.0 | 다중 월드 + 보스 아레나 + 보호 정책 | [../world/](../world/) |
+| `world-1.4.1.jar` | 1.4.1 | 다중 월드 + 보스 아레나 + 보호 정책 | [../world/](../world/) |
 
 ## 외부 의존 (별도 설치 필요)
 

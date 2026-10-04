@@ -121,17 +121,19 @@ public class WorldManager {
     }
 
     /**
-     * jar 내장 zip(worlds/월드이름.zip)에서 월드 폴더를 복원한다.
+     * 플러그인 데이터 폴더의 zip(plugins/World/worlds/월드이름.zip)에서 월드 폴더를 복원한다.
      * zip 내부 최상위 폴더명이 월드 이름과 일치해야 한다.
+     *
+     * <p>월드 zip 은 외부 맵 기반이라 jar/저장소에 포함하지 않는다. 운영자가 직접 넣어야 한다.
      */
     private void restoreWorld(String worldName) {
-        String resourcePath = "worlds/" + worldName + ".zip";
-        try (InputStream is = plugin.getResource(resourcePath)) {
-            if (is == null) {
-                logger.info("[World] 내장 월드 없음: " + resourcePath);
-                return;
-            }
+        File zipFile = new File(new File(plugin.getDataFolder(), "worlds"), worldName + ".zip");
+        if (!zipFile.isFile()) {
+            logger.info("[World] 복원용 월드 zip 없음: " + zipFile.getPath());
+            return;
+        }
 
+        try (InputStream is = Files.newInputStream(zipFile.toPath())) {
             File serverRoot = Bukkit.getWorldContainer().getCanonicalFile();
             try (ZipInputStream zis = new ZipInputStream(is)) {
                 ZipEntry entry;

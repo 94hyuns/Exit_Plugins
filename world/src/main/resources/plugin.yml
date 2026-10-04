@@ -1,5 +1,5 @@
 name: World
-version: 1.4.0
+version: 1.4.1
 main: com.exit.world.WorldPlugin
 api-version: '1.21'
 description: 멀티월드 관리 및 포탈 GUI 플러그인
